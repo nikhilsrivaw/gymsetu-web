@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
-import { Home, Zap, Tag, MessageCircle, LayoutDashboard } from 'lucide-react';
+import { Home, Zap, Tag, MessageCircle, LayoutDashboard, UserCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
@@ -79,7 +79,7 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Bottom Navigation - True Mobile Compatibility */}
+      {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-6 left-4 right-4 z-50 bg-black border-2 border-white p-1 flex justify-around items-center shadow-[6px_6px_0px_0px_rgba(255,77,0,1)]">
         {navLinks.map((link) => {
           const Icon = link.icon;
@@ -100,6 +100,31 @@ export const Navbar = () => {
             </Link>
           );
         })}
+
+        {/* Auth slot */}
+        {session ? (
+          <Link
+            to="/dashboard"
+            className={cn(
+              "flex flex-col items-center justify-center py-2 px-1 transition-all flex-1",
+              location.pathname === '/dashboard' ? "text-brand-orange" : "text-white"
+            )}
+          >
+            <LayoutDashboard className={cn("w-5 h-5 mb-1", location.pathname === '/dashboard' ? "stroke-[3px]" : "stroke-[2px]")} />
+            <span className="font-mono text-[8px] font-bold uppercase tracking-tighter">DASH</span>
+          </Link>
+        ) : (
+          <Link
+            to="/signup"
+            className={cn(
+              "flex flex-col items-center justify-center py-2 px-1 transition-all flex-1",
+              ['/signup', '/login'].includes(location.pathname) ? "text-brand-orange" : "text-white"
+            )}
+          >
+            <UserCircle className={cn("w-5 h-5 mb-1", ['/signup', '/login'].includes(location.pathname) ? "stroke-[3px]" : "stroke-[2px]")} />
+            <span className="font-mono text-[8px] font-bold uppercase tracking-tighter">SIGN UP</span>
+          </Link>
+        )}
       </nav>
     </>
   );
