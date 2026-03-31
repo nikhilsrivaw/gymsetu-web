@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { OAuthButtons } from '../components/OAuthButtons';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -46,7 +47,15 @@ export const Login = () => {
         <h1 className="font-archivo text-5xl md:text-6xl text-white uppercase mb-2 leading-none tracking-tighter">
           WELCOME<br /><span className="text-brand-orange">BACK.</span>
         </h1>
-        <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-12">GYM OWNER PORTAL</p>
+        <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-8">GYM OWNER PORTAL</p>
+
+        <OAuthButtons />
+
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="font-mono text-[10px] text-white/30 uppercase font-bold">OR CONTINUE WITH EMAIL</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           <div>

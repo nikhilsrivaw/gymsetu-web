@@ -11,10 +11,30 @@ import { Pricing } from './pages/Pricing';
 import { Features } from './pages/Features';
 import { Contact } from './pages/Contact';
 import { Signup } from './pages/Signup';
+import { SignupPlan } from './pages/SignupPlan';
+import { SignupSetup } from './pages/SignupSetup';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { NotFound } from './pages/NotFound';
+import { AuthCallback } from './pages/AuthCallback';
+import { Admin } from './pages/Admin';
+import { Branches } from './pages/Branches';
+import { Tokens } from './pages/Tokens';
 import { trackEvent } from './lib/analytics';
+
+// Franchise portal
+import { FranchiseLayout } from './franchise/components/FranchiseLayout';
+import { FranchiseLanding } from './franchise/pages/FranchiseLanding';
+import { FranchiseReadiness } from './franchise/pages/FranchiseReadiness';
+import { FranchiseSetup } from './franchise/pages/FranchiseSetup';
+import { FranchiseDashboard } from './franchise/pages/FranchiseDashboard';
+import { FranchiseLocations } from './franchise/pages/FranchiseLocations';
+import { FranchiseInvites } from './franchise/pages/FranchiseInvites';
+import { FranchiseRoyalties } from './franchise/pages/FranchiseRoyalties';
+import { FranchiseSOPs } from './franchise/pages/FranchiseSOPs';
+import { FranchiseSettings } from './franchise/pages/FranchiseSettings';
+import { AcceptInvite } from './franchise/pages/AcceptInvite';
+import { FranchisePricing } from './franchise/pages/FranchisePricing';
 
 declare global {
   interface Window {
@@ -27,8 +47,11 @@ const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210';
 const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // Pages without marketing footer / WhatsApp widget
-const NO_FOOTER_PATHS  = new Set(['/signup', '/login', '/dashboard']);
-const NO_WIDGET_PATHS  = new Set(['/dashboard']);
+const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens']);
+const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback']);
+
+// Franchise portal has its own layout — hide main Navbar/Footer entirely
+const isFranchisePath = (p: string) => p.startsWith('/franchise/') || p === '/franchise' || p.startsWith('/accept-invite/');
 
 function GA4Init() {
   useEffect(() => {
@@ -56,22 +79,48 @@ function PageTracker() {
 
 function AppShell() {
   const { pathname } = useLocation();
-  const showFooter = !NO_FOOTER_PATHS.has(pathname);
-  const showWidget = !NO_WIDGET_PATHS.has(pathname);
+  const franchise = isFranchisePath(pathname);
+  const showFooter = !franchise && !NO_FOOTER_PATHS.has(pathname);
+  const showWidget = !franchise && !NO_WIDGET_PATHS.has(pathname);
 
   return (
     <div className="min-h-screen flex flex-col selection:bg-black selection:text-brand-orange">
-      <Navbar />
+      {!franchise && <Navbar />}
       <div className="flex-grow">
         <Routes>
+          {/* Main site routes */}
           <Route path="/"          element={<Home />} />
           <Route path="/pricing"   element={<Pricing />} />
           <Route path="/features"  element={<Features />} />
           <Route path="/contact"   element={<Contact />} />
-          <Route path="/signup"    element={<Signup />} />
-          <Route path="/login"     element={<Login />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="*"          element={<NotFound />} />
+          <Route path="/signup"        element={<Signup />} />
+          <Route path="/signup/plan"   element={<SignupPlan />} />
+          <Route path="/signup/setup"  element={<SignupSetup />} />
+          <Route path="/login"         element={<Login />} />
+          <Route path="/dashboard"     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/branches"      element={<ProtectedRoute><Branches /></ProtectedRoute>} />
+          <Route path="/tokens"        element={<ProtectedRoute><Tokens /></ProtectedRoute>} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/admin"         element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+
+          {/* Franchise portal — public pages (own layout) */}
+          <Route path="/franchise" element={<FranchiseLanding />} />
+          <Route path="/franchise/pricing" element={<FranchisePricing />} />
+          <Route path="/franchise/readiness" element={<FranchiseReadiness />} />
+          <Route path="/franchise/setup" element={<FranchiseSetup />} />
+
+          {/* Franchise portal — protected pages (with sidebar layout) */}
+          <Route path="/franchise/dashboard" element={<FranchiseLayout><FranchiseDashboard /></FranchiseLayout>} />
+          <Route path="/franchise/locations" element={<FranchiseLayout><FranchiseLocations /></FranchiseLayout>} />
+          <Route path="/franchise/invites"   element={<FranchiseLayout><FranchiseInvites /></FranchiseLayout>} />
+          <Route path="/franchise/royalties" element={<FranchiseLayout><FranchiseRoyalties /></FranchiseLayout>} />
+          <Route path="/franchise/sops"      element={<FranchiseLayout><FranchiseSOPs /></FranchiseLayout>} />
+          <Route path="/franchise/settings"  element={<FranchiseLayout><FranchiseSettings /></FranchiseLayout>} />
+
+          {/* Accept invite (standalone, no sidebar) */}
+          <Route path="/accept-invite/:token" element={<AcceptInvite />} />
+
+          <Route path="*"              element={<NotFound />} />
         </Routes>
       </div>
 

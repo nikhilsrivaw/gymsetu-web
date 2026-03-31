@@ -71,6 +71,7 @@ export const Dashboard = () => {
         const { data: sub, error: subErr } = await supabase
           .from('subscriptions')
           .select('*')
+          .eq('owner_id', user?.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -357,18 +358,72 @@ export const Dashboard = () => {
             )}
           </>
         ) : (
-          /* No subscription */
-          <div className="border-2 border-white/20 p-8 mb-6 text-center">
-            <p className="font-archivo text-2xl text-white uppercase mb-4">NO ACTIVE SUBSCRIPTION</p>
-            <p className="font-sans text-white/60 text-sm mb-6">
-              Your account is set up. Choose a plan to activate your gym.
-            </p>
-            <Link
-              to="/pricing"
-              className="inline-block bg-brand-orange text-black px-6 py-3 font-archivo text-lg uppercase tracking-tighter hover:opacity-90 transition-opacity"
-            >
-              VIEW PLANS →
-            </Link>
+          /* No subscription — guide them to pick a plan */
+          <div className="mb-6">
+            <div className="border-2 border-brand-orange p-8 mb-4">
+              <p className="font-mono text-[10px] text-brand-orange uppercase font-bold mb-3">
+                ● ACTIVATION REQUIRED
+              </p>
+              <h2 className="font-archivo text-3xl text-white uppercase leading-tight tracking-tighter mb-2">
+                YOUR GYM IS READY.<br />PICK A PLAN TO GO LIVE.
+              </h2>
+              <p className="font-sans text-white/50 text-sm mb-8">
+                Your account is set up. Select a plan below to activate your gym and start managing members.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                {/* Pro */}
+                <div className="bg-brand-orange p-5 relative">
+                  <span className="absolute -top-px right-4 -translate-y-full bg-black text-white font-mono text-[8px] uppercase px-2 py-0.5 font-bold border border-white/20">
+                    7-DAY FREE TRIAL
+                  </span>
+                  <div className="font-archivo text-2xl text-black mb-0.5">PRO</div>
+                  <div className="font-mono text-xs font-bold text-black/60 mb-3">₹1,699/month</div>
+                  <ul className="flex flex-col gap-1.5 mb-4">
+                    {['Everything in Basic', 'AI Insights & Reports', 'WhatsApp Automation', 'Revenue Forecast'].map(f => (
+                      <li key={f} className="font-sans text-[11px] text-black flex items-start gap-2">
+                        <span className="font-bold mt-0.5">✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    to="/signup/plan"
+                    className="block text-center bg-black text-white font-mono text-[10px] uppercase font-bold py-2.5 hover:bg-white hover:text-black transition-colors"
+                  >
+                    START FREE TRIAL →
+                  </Link>
+                </div>
+
+                {/* Basic */}
+                <div className="border-2 border-white/20 p-5">
+                  <div className="font-archivo text-2xl text-white mb-0.5">BASIC</div>
+                  <div className="font-mono text-xs font-bold text-white/40 mb-3">₹999/month</div>
+                  <ul className="flex flex-col gap-1.5 mb-4">
+                    {['Member management', 'Attendance & payments', 'Reports & analytics', 'Trainer management'].map(f => (
+                      <li key={f} className="font-sans text-[11px] text-white/70 flex items-start gap-2">
+                        <span className="font-bold mt-0.5 text-white/40">✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    to="/signup/plan"
+                    className="block text-center border border-white/20 text-white font-mono text-[10px] uppercase font-bold py-2.5 hover:border-white transition-colors"
+                  >
+                    GET BASIC →
+                  </Link>
+                </div>
+              </div>
+
+              <p className="font-mono text-[10px] text-white/20 uppercase font-bold text-center">
+                ALREADY CHOSE A PLAN?{' '}
+                <button
+                  onClick={() => window.location.reload()}
+                  className="text-brand-orange hover:underline"
+                >
+                  REFRESH →
+                </button>
+              </p>
+            </div>
           </div>
         )}
 

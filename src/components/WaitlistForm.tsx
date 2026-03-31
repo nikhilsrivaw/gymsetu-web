@@ -2,9 +2,24 @@ import React, { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../lib/analytics';
+import type { PlanId } from '../lib/constants';
+
+const PLAN_LABELS: Record<PlanId, string> = {
+  basic:    'Basic Plan — ₹999/month',
+  pro:      '7 Days Free — No Card Needed',
+  pro_plus: 'Pro Plus Plan — ₹2,199/month',
+  pro_max:  'Pro Max Plan — ₹2,999/month',
+};
+
+const PLAN_CTA: Record<PlanId, string> = {
+  basic:    'PROCEED TO PAYMENT →',
+  pro:      'START FREE TRIAL →',
+  pro_plus: 'PROCEED TO PAYMENT →',
+  pro_max:  'PROCEED TO PAYMENT →',
+};
 
 interface WaitlistFormProps {
-  plan: 'basic' | 'pro';
+  plan: PlanId;
   onClose: () => void;
   onReadyForPayment?: (data: { owner_name: string; gym_name: string; phone: string }) => void;
 }
@@ -35,9 +50,9 @@ export const WaitlistForm = ({ plan, onClose, onReadyForPayment }: WaitlistFormP
 
     const { error: sbError } = await supabase.from('waitlist').insert({
       owner_name: form.owner_name.trim(),
-      gym_name: form.gym_name.trim(),
-      city: form.city.trim() || null,
-      phone: form.phone.trim(),
+      gym_name:   form.gym_name.trim(),
+      city:       form.city.trim() || null,
+      phone:      form.phone.trim(),
       plan_interest: plan,
     });
 
@@ -50,7 +65,9 @@ export const WaitlistForm = ({ plan, onClose, onReadyForPayment }: WaitlistFormP
 
     trackEvent('waitlist_submit', { plan });
 
-    if (plan === 'basic' && onReadyForPayment) {
+    if (plan !== 'pro' && onReadyForPayment) {
+      onReadyForPayment({ owner_name: form.owner_name, gym_name: form.gym_name, phone: form.phone });
+    } else if (plan === 'pro' && onReadyForPayment) {
       onReadyForPayment({ owner_name: form.owner_name, gym_name: form.gym_name, phone: form.phone });
     } else {
       setSuccess(true);
@@ -58,11 +75,10 @@ export const WaitlistForm = ({ plan, onClose, onReadyForPayment }: WaitlistFormP
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true" aria-label="Join waitlist">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true" aria-label="Get started">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div className="relative z-10 bg-[#141414] border-2 border-white/10 w-full max-w-md p-8">
-        <button
-          onClick={onClose}
+        <button onClick={onClose}
           className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
           aria-label="Close"
         >
@@ -85,15 +101,15 @@ export const WaitlistForm = ({ plan, onClose, onReadyForPayment }: WaitlistFormP
               {plan === 'pro' ? 'START FREE TRIAL' : 'GET STARTED'}
             </h2>
             <p className="font-mono text-[10px] text-brand-orange uppercase font-bold mb-8">
-              {plan === 'pro' ? '7 DAYS FREE — NO CARD NEEDED' : 'BASIC PLAN — ₹999/MONTH'}
+              {PLAN_LABELS[plan]}
             </p>
 
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
               {[
-                { id: 'wl_name',     field: 'owner_name', label: 'Your Name *',         placeholder: 'Rajesh Kumar',       type: 'text' },
-                { id: 'wl_gym',      field: 'gym_name',   label: 'Gym Name *',           placeholder: 'Iron Beast Fitness', type: 'text' },
-                { id: 'wl_city',     field: 'city',       label: 'City',                 placeholder: 'Mumbai',             type: 'text' },
-                { id: 'wl_phone',    field: 'phone',      label: 'WhatsApp Number *',    placeholder: '9876543210',         type: 'tel'  },
+                { id: 'wl_name',  field: 'owner_name', label: 'Your Name *',      placeholder: 'Rajesh Kumar',       type: 'text' },
+                { id: 'wl_gym',   field: 'gym_name',   label: 'Gym Name *',        placeholder: 'Iron Beast Fitness', type: 'text' },
+                { id: 'wl_city',  field: 'city',       label: 'City',              placeholder: 'Mumbai',             type: 'text' },
+                { id: 'wl_phone', field: 'phone',      label: 'WhatsApp Number *', placeholder: '9876543210',         type: 'tel'  },
               ].map(({ id, field, label, placeholder, type }) => (
                 <div key={field}>
                   <label htmlFor={id} className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
@@ -115,16 +131,10 @@ export const WaitlistForm = ({ plan, onClose, onReadyForPayment }: WaitlistFormP
                 <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">{error}</p>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
+              <button type="submit" disabled={loading}
                 className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50 mt-2"
               >
-                {loading
-                  ? 'PLEASE WAIT...'
-                  : plan === 'pro'
-                  ? 'START FREE TRIAL →'
-                  : 'PROCEED TO PAYMENT →'}
+                {loading ? 'PLEASE WAIT...' : PLAN_CTA[plan]}
               </button>
             </form>
           </>
