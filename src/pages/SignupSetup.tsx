@@ -5,11 +5,10 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { trackEvent } from '../lib/analytics';
+import { initiatePayU } from '../lib/payu';
 import { AppStoreBadges } from '../components/AppStoreBadges';
 import { StepIndicator } from './Signup';
-import { CYCLE_DAYS, PLAN_TOKENS, PRICING, toPaise, type BillingCycle, type PlanId } from '../lib/constants';
-
-declare global { interface Window { Razorpay: any; } }
+import { CYCLE_DAYS, PLAN_TOKENS, PRICING, type BillingCycle, type PlanId } from '../lib/constants';
 
 function validatePhone(phone: string) {
   return /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ''));
@@ -41,15 +40,6 @@ export const SignupSetup = () => {
 
   useEffect(() => { document.title = 'Gym Setup | GymSetu'; }, []);
 
-  // Load Razorpay SDK
-  useEffect(() => {
-    if (document.getElementById('rzp-sdk')) return;
-    const s = document.createElement('script');
-    s.id = 'rzp-sdk';
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.head.appendChild(s);
-  }, []);
-
   useEffect(() => {
     if (authLoading) return;
     if (!session) { navigate('/signup', { replace: true }); return; }
@@ -80,78 +70,78 @@ export const SignupSetup = () => {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm(f => ({ ...f, [field]: e.target.value }));
 
-  // ── Core DB writes — called after payment confirmed (or immediately for Pro trial) ──
-  const createGymAndSubscription = async (paymentId: string | null) => {
-    if (!session) return;
-    setLoading(true);
+  // Provision gym + profile + subscription. Returns the new subscription id.
+  // For Pro: status='trial' immediately.
+  // For paid plans: status='pending_payment', payment_status='pending'.
+  const provision = async (): Promise<{ subscriptionId: string; gymId: string } | null> => {
+    if (!session) return null;
+    const userId = session.user.id;
 
-    try {
-      const userId = session.user.id;
-
-      // 1 — Upload logo
-      let logoUrl: string | null = null;
-      if (logoFile) {
-        const ext  = logoFile.name.split('.').pop();
-        const path = `${userId}/logo.${ext}`;
-        const { error: uploadErr } = await supabase.storage
-          .from('gym-logos').upload(path, logoFile, { upsert: true });
-        if (!uploadErr) {
-          const { data: urlData } = supabase.storage.from('gym-logos').getPublicUrl(path);
-          logoUrl = urlData.publicUrl;
-        } else {
-          console.warn('Logo upload failed (continuing):', uploadErr.message);
-        }
+    // 1 — Upload logo
+    let logoUrl: string | null = null;
+    if (logoFile) {
+      const ext  = logoFile.name.split('.').pop();
+      const path = `${userId}/logo.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('gym-logos').upload(path, logoFile, { upsert: true });
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from('gym-logos').getPublicUrl(path);
+        logoUrl = urlData.publicUrl;
+      } else {
+        console.warn('Logo upload failed (continuing):', uploadErr.message);
       }
+    }
 
-      // 2 — Create gym
-      const { data: gymData, error: gymErr } = await supabase
-        .from('gyms').insert({
-          name:        form.gymName.trim(),
-          owner_id:    userId,
-          is_branch:   false,
-          description: form.description.trim() || null,
-          logo_url:    logoUrl,
-          phone:       form.phone.trim() || null,
-          address:     form.city.trim() || null,
-        }).select('id').single();
-      if (gymErr) throw new Error(`Gym creation failed: ${gymErr.message}`);
+    // 2 — Create gym
+    const { data: gymData, error: gymErr } = await supabase
+      .from('gyms').insert({
+        name:        form.gymName.trim(),
+        owner_id:    userId,
+        is_branch:   false,
+        description: form.description.trim() || null,
+        logo_url:    logoUrl,
+        phone:       form.phone.trim() || null,
+        address:     form.city.trim() || null,
+      }).select('id').single();
+    if (gymErr) throw new Error(`Gym creation failed: ${gymErr.message}`);
 
-      // 3 — Create profile (must exist before subscription — FK constraint)
-      const { error: profileErr } = await supabase.from('profiles').insert({
-        id:        userId,
-        full_name: form.fullName.trim(),
-        email:     session.user.email ?? '',
-        role:      'gym_owner',
-        gym_id:    gymData.id,
-        phone:     form.phone.trim() || null,
-      });
-      if (profileErr) throw new Error(`Profile creation failed: ${profileErr.message}`);
+    // 3 — Create profile (FK constraint)
+    const { error: profileErr } = await supabase.from('profiles').insert({
+      id:        userId,
+      full_name: form.fullName.trim(),
+      email:     session.user.email ?? '',
+      role:      'gym_owner',
+      gym_id:    gymData.id,
+      phone:     form.phone.trim() || null,
+    });
+    if (profileErr) throw new Error(`Profile creation failed: ${profileErr.message}`);
 
-      // 4 — Create subscription
-      const now        = new Date();
-      const days       = CYCLE_DAYS[cycle] ?? 30;
-      const periodEnd  = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-      const trialEndsAt = plan === 'pro'
-        ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        : null;
+    // 4 — Create subscription
+    const now        = new Date();
+    const days       = CYCLE_DAYS[cycle] ?? 30;
+    const periodEnd  = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+    const trialEndsAt = plan === 'pro'
+      ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      : null;
 
-      const { error: subErr } = await supabase.from('subscriptions').insert({
-        gym_id:                  gymData.id,
-        owner_id:                userId,
-        plan,
-        tier:                    plan,
-        billing_cycle:           cycle,
-        status:                  plan === 'pro' ? 'trial' : 'active',
-        trial_ends_at:           trialEndsAt,
-        current_period_start:    now.toISOString(),
-        current_period_end:      periodEnd.toISOString(),
-        razorpay_payment_id:     paymentId,
-        razorpay_subscription_id: null,
-        branch_slots:            0,
-      });
-      if (subErr) throw new Error(`Subscription creation failed: ${subErr.message}`);
+    const isProTrial = plan === 'pro';
+    const { data: subData, error: subErr } = await supabase.from('subscriptions').insert({
+      gym_id:               gymData.id,
+      owner_id:             userId,
+      plan,
+      tier:                 plan,
+      billing_cycle:        cycle,
+      status:               isProTrial ? 'trial' : 'pending_payment',
+      payment_status:       isProTrial ? 'success' : 'pending',
+      trial_ends_at:        trialEndsAt,
+      current_period_start: now.toISOString(),
+      current_period_end:   periodEnd.toISOString(),
+      branch_slots:         0,
+    }).select('id').single();
+    if (subErr) throw new Error(`Subscription creation failed: ${subErr.message}`);
 
-      // 5 — Seed WhatsApp tokens
+    // 5 — Seed WhatsApp tokens for trial / immediately-active plans
+    if (isProTrial) {
       const tokenAllocation = PLAN_TOKENS[plan];
       if (tokenAllocation > 0) {
         const monthYear = now.toISOString().slice(0, 7);
@@ -163,31 +153,9 @@ export const SignupSetup = () => {
         });
         if (tokErr) console.warn('Token seed failed (non-critical):', tokErr.message);
       }
-
-      // 6 — Log purchase record (only for paid plans)
-      if (paymentId) {
-        await supabase.from('purchases').insert({
-          owner_id:           userId,
-          gym_id:             gymData.id,
-          type:               'plan',
-          plan,
-          billing_cycle:      cycle,
-          amount:             PRICING[plan][cycle],
-          razorpay_payment_id: paymentId,
-          status:             'paid',
-        });
-      }
-
-      trackEvent('sign_up', { plan, cycle });
-      setSuccessEmail(session.user.email ?? '');
-      setDone(true);
-
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Setup failed. Please try again.';
-      toast(msg, 'error');
-      console.error('Signup setup error:', err);
-      setLoading(false);
     }
+
+    return { subscriptionId: subData.id, gymId: gymData.id };
   };
 
   // ── Form submit ───────────────────────────────────────────────────────────
@@ -199,48 +167,44 @@ export const SignupSetup = () => {
     if (!form.gymName.trim())      { toast('Gym name is required.', 'error'); return; }
     if (!validatePhone(form.phone)){ toast('Enter a valid 10-digit Indian mobile number.', 'error'); return; }
 
-    // Pro plan = 7-day free trial, no payment needed
-    if (plan === 'pro') {
-      await createGymAndSubscription(null);
-      return;
-    }
-
-    // Paid plans — open Razorpay first
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again in a moment.', 'error');
-      return;
-    }
-
-    const amount = PRICING[plan][cycle];
     setLoading(true);
+    try {
+      const result = await provision();
+      if (!result) return;
 
-    const rzp = new window.Razorpay({
-      key:         import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount:      toPaise(amount),
-      currency:    'INR',
-      name:        'GymSetu',
-      description: `${plan.replace(/_/g, ' ').toUpperCase()} Plan — ${CYCLE_LABEL[cycle]}`,
-      prefill: {
-        name:    form.fullName,
-        contact: form.phone,
-        email:   session.user.email ?? '',
-      },
-      notes: { plan, cycle, gym_name: form.gymName },
-      theme: { color: '#FF4D00' },
-      handler: async (response: { razorpay_payment_id: string }) => {
-        // Payment confirmed — now create everything
-        await createGymAndSubscription(response.razorpay_payment_id);
-      },
-      modal: {
-        ondismiss: () => setLoading(false), // user closed modal without paying
-      },
-    });
-    rzp.open();
+      trackEvent('sign_up', { plan, cycle });
+
+      // Pro plan = free trial, no payment — show success screen
+      if (plan === 'pro') {
+        setSuccessEmail(session.user.email ?? '');
+        setDone(true);
+        setLoading(false);
+        return;
+      }
+
+      // Paid plans — kick off PayU. The user's browser navigates away;
+      // payu-callback (server) brings them back to /payment/success or /payment/failure.
+      await initiatePayU({
+        subscription_id: result.subscriptionId,
+        amount:          PRICING[plan][cycle],
+        productinfo:     `${plan.replace(/_/g, ' ').toUpperCase()} Plan — ${CYCLE_LABEL[cycle]}`,
+        firstname:       form.fullName.trim(),
+        email:           session.user.email ?? '',
+        phone:           form.phone.trim(),
+        udf1:             plan,
+      });
+      // initiatePayU submits a form and navigates away — keep "loading" true.
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Setup failed. Please try again.';
+      toast(msg, 'error');
+      console.error('Signup setup error:', err);
+      setLoading(false);
+    }
   };
 
   if (authLoading) return null;
 
-  // ── Success screen ────────────────────────────────────────────────────────
+  // ── Success screen (Pro trial only — paid plans land on /payment/success) ─
   if (done) {
     return (
       <main className="bg-near-black min-h-screen flex items-center justify-center px-4 pt-24 pb-16">
@@ -380,7 +344,7 @@ export const SignupSetup = () => {
           <button type="submit" disabled={loading}
             className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50">
             {loading
-              ? 'PLEASE WAIT...'
+              ? (isPaidPlan ? 'REDIRECTING TO PAYU...' : 'PLEASE WAIT...')
               : plan === 'pro'
                 ? 'START FREE TRIAL →'
                 : `PAY ₹${payAmount.toLocaleString('en-IN')} & LAUNCH →`}
@@ -389,6 +353,12 @@ export const SignupSetup = () => {
           {plan === 'pro' && (
             <p className="text-center font-mono text-[10px] text-white/20 uppercase font-bold -mt-2">
               7 DAYS FREE — NO CARD REQUIRED
+            </p>
+          )}
+
+          {isPaidPlan && (
+            <p className="text-center font-mono text-[10px] text-white/20 uppercase font-bold -mt-2">
+              SECURED BY PAYU — REDIRECTS TO PAYMENT PAGE
             </p>
           )}
         </form>

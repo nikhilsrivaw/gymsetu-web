@@ -20,6 +20,8 @@ import { AuthCallback } from './pages/AuthCallback';
 import { Admin } from './pages/Admin';
 import { Branches } from './pages/Branches';
 import { Tokens } from './pages/Tokens';
+import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentFailure } from './pages/PaymentFailure';
 import { trackEvent } from './lib/analytics';
 
 // Franchise portal
@@ -47,8 +49,8 @@ const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210';
 const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // Pages without marketing footer / WhatsApp widget
-const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens']);
-const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback']);
+const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens', '/payment/success', '/payment/failure']);
+const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback', '/payment/success', '/payment/failure']);
 
 // Franchise portal has its own layout — hide main Navbar/Footer entirely
 const isFranchisePath = (p: string) => p.startsWith('/franchise/') || p === '/franchise' || p.startsWith('/accept-invite/');
@@ -102,6 +104,8 @@ function AppShell() {
           <Route path="/tokens"        element={<ProtectedRoute><Tokens /></ProtectedRoute>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/admin"         element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/failure" element={<PaymentFailure />} />
 
           {/* Franchise portal — public pages (own layout) */}
           <Route path="/franchise" element={<FranchiseLanding />} />
