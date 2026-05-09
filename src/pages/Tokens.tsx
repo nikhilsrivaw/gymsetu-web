@@ -4,10 +4,9 @@ import { MessageSquare, Check, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { TOKEN_PACKS, PLAN_TOKENS, toPaise, type PlanId } from '../lib/constants';
+import { TOKEN_PACKS, PLAN_TOKENS, type PlanId } from '../lib/constants';
 import { trackEvent } from '../lib/analytics';
-
-declare global { interface Window { Razorpay: any; } }
+import { initiatePayU } from '../lib/payu';
 
 export const Tokens = () => {
   const navigate = useNavigate();
@@ -25,14 +24,6 @@ export const Tokens = () => {
   const monthYear = new Date().toISOString().slice(0, 7);
 
   useEffect(() => { document.title = 'Buy Tokens | GymSetu'; }, []);
-
-  useEffect(() => {
-    if (document.getElementById('rzp-sdk')) return;
-    const s = document.createElement('script');
-    s.id = 'rzp-sdk';
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.head.appendChild(s);
-  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -63,12 +54,9 @@ export const Tokens = () => {
 
   const handlePurchase = async (tokens: number, price: number) => {
     if (!session || !gymId) return;
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again.', 'error');
-      return;
-    }
 
-    // 1. Create pending purchase record
+    // Create pending purchase row — payu-callback will flip status to 'paid'
+    // and add tokens to subscription_tokens server-side after PayU confirms.
     const { data: purchase, error: purchaseErr } = await supabase
       .from('purchases').insert({
         owner_id: session.user.id,
@@ -85,54 +73,24 @@ export const Tokens = () => {
     }
 
     setPurchasing(true);
+    trackEvent('purchase_initiated', { product: 'tokens', tokens, price });
 
-    const rzp = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: toPaise(price),
-      currency: 'INR',
-      name: 'GymSetu',
-      description: `${tokens.toLocaleString('en-IN')} WhatsApp Tokens`,
-      prefill: {
-        name: session.user.user_metadata?.full_name ?? '',
-        contact: session.user.user_metadata?.phone ?? '',
-      },
-      notes: { purchase_id: purchase.id, tokens },
-      theme: { color: '#FF4D00' },
-      handler: async (response: { razorpay_payment_id: string }) => {
-        try {
-          const newTotal = (tokensTotal ?? 0) + tokens;
-
-          // 2a. Mark purchase as paid
-          await supabase.from('purchases').update({
-            status: 'paid',
-            razorpay_payment_id: response.razorpay_payment_id,
-          }).eq('id', purchase.id);
-
-          // 2b. Upsert subscription_tokens — add to current month's total
-          const { error: tokErr } = await supabase.from('subscription_tokens').upsert(
-            {
-              gym_id: gymId,
-              month_year: monthYear,
-              tokens_total: newTotal,
-              tokens_used: tokensUsed ?? 0,
-            },
-            { onConflict: 'gym_id,month_year' }
-          );
-          if (tokErr) throw new Error(tokErr.message);
-
-          setTokensTotal(newTotal);
-          setLastAdded(tokens);
-          trackEvent('purchase', { product: 'tokens', tokens, price });
-        } catch (err) {
-          await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
-          toast(err instanceof Error ? err.message : 'Failed to add tokens.', 'error');
-        } finally {
-          setPurchasing(false);
-        }
-      },
-      modal: { ondismiss: () => setPurchasing(false) },
-    });
-    rzp.open();
+    try {
+      await initiatePayU({
+        purchase_id: purchase.id,
+        amount:      price,
+        productinfo: `${tokens.toLocaleString('en-IN')} WhatsApp Tokens`,
+        firstname:   session.user.user_metadata?.full_name ?? session.user.email ?? '',
+        email:       session.user.email ?? '',
+        phone:       session.user.user_metadata?.phone ?? '0000000000',
+        udf1:        `tokens:${tokens}`,
+      });
+      // Browser navigates to PayU.
+    } catch (err) {
+      await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
+      toast(err instanceof Error ? err.message : 'Could not start payment.', 'error');
+      setPurchasing(false);
+    }
   };
 
   if (authLoading || loading) {

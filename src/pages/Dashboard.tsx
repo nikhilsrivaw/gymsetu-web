@@ -5,11 +5,8 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AppStoreBadges } from '../components/AppStoreBadges';
-import { TOKEN_PACKS, RAZORPAY_PRO_PAISE } from '../lib/constants';
-
-declare global {
-  interface Window { Razorpay: any; }
-}
+import { TOKEN_PACKS, PRICING } from '../lib/constants';
+import { initiatePayU } from '../lib/payu';
 
 interface Subscription {
   id: string;
@@ -56,15 +53,6 @@ export const Dashboard = () => {
     document.title = 'Dashboard | GymSetu';
   }, []);
 
-  // Load Razorpay SDK
-  useEffect(() => {
-    if (document.getElementById('rzp-sdk')) return;
-    const script = document.createElement('script');
-    script.id = 'rzp-sdk';
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.head.appendChild(script);
-  }, []);
-
   useEffect(() => {
     const load = async () => {
       try {
@@ -107,79 +95,78 @@ export const Dashboard = () => {
     load();
   }, [user]);
 
-  const openTokenTopup = (pack: typeof TOKEN_PACKS[number]) => {
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again.', 'error');
+  const openTokenTopup = async (pack: typeof TOKEN_PACKS[number]) => {
+    if (!user || !subscription) return;
+
+    const { data: purchase, error: purchaseErr } = await supabase
+      .from('purchases').insert({
+        owner_id:     user.id,
+        gym_id:       subscription.gym_id,
+        type:         'token_pack',
+        token_amount: pack.tokens,
+        amount:       pack.price,
+        status:       'pending',
+      }).select('id').single();
+
+    if (purchaseErr || !purchase) {
+      toast('Could not initiate purchase — please try again.', 'error');
       return;
     }
 
-    const rzp = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: pack.paise,
-      currency: 'INR',
-      name: 'GymSetu',
-      description: `WhatsApp Token Pack — ${pack.tokens} messages`,
-      prefill: { email: user?.email },
-      notes: { pack_tokens: String(pack.tokens), gym_id: subscription?.gym_id ?? '' },
-      theme: { color: '#FF4D00' },
-      handler: (_response: { razorpay_payment_id: string }) => {
-        // TODO: Verify payment via Supabase Edge Function webhook + credit tokens
-        toast(`Payment received! Your ${pack.tokens} tokens will be credited shortly.`, 'success');
-      },
-    });
-    rzp.open();
+    try {
+      await initiatePayU({
+        purchase_id: purchase.id,
+        amount:      pack.price,
+        productinfo: `WhatsApp Token Pack — ${pack.tokens} messages`,
+        firstname:   user.user_metadata?.full_name ?? user.email ?? '',
+        email:       user.email ?? '',
+        phone:       user.user_metadata?.phone ?? '0000000000',
+        udf1:        `tokens:${pack.tokens}`,
+      });
+    } catch (err) {
+      await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
+      toast(err instanceof Error ? err.message : 'Could not start payment.', 'error');
+    }
   };
 
-  const openUpgradeToPro = () => {
-    if (!subscription) return;
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again.', 'error');
-      return;
-    }
+  const openUpgradeToPro = async () => {
+    if (!subscription || !user) return;
 
     setUpgradeLoading(true);
 
-    const rzp = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: RAZORPAY_PRO_PAISE,
-      currency: 'INR',
-      name: 'GymSetu',
-      description: 'Upgrade to Pro — Monthly Subscription',
-      prefill: { email: user?.email },
-      notes: { upgrade_from: 'basic', gym_id: subscription.gym_id },
-      theme: { color: '#FF4D00' },
-      handler: async (response: { razorpay_payment_id: string }) => {
-        const now = new Date();
-        const periodEnd = new Date(now);
-        periodEnd.setDate(periodEnd.getDate() + 30);
+    const amount = PRICING.pro.monthly;
+    const { data: purchase, error: purchaseErr } = await supabase
+      .from('purchases').insert({
+        owner_id:      user.id,
+        gym_id:        subscription.gym_id,
+        type:          'plan',
+        plan:          'pro',
+        billing_cycle: 'monthly',
+        amount,
+        status:        'pending',
+      }).select('id').single();
 
-        const { error, data: updated } = await supabase
-          .from('subscriptions')
-          .update({
-            plan: 'pro',
-            status: 'active',
-            razorpay_payment_id: response.razorpay_payment_id,
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            updated_at: now.toISOString(),
-          })
-          .eq('id', subscription.id)
-          .select()
-          .single();
+    if (purchaseErr || !purchase) {
+      toast('Could not initiate upgrade — please try again.', 'error');
+      setUpgradeLoading(false);
+      return;
+    }
 
-        if (error) {
-          toast('Upgrade recorded but DB update failed. Contact support.', 'error');
-        } else {
-          setSubscription(updated);
-          toast('Welcome to Pro! AI features and WhatsApp automation are now active.', 'success');
-        }
-        setUpgradeLoading(false);
-      },
-      modal: {
-        ondismiss: () => setUpgradeLoading(false),
-      },
-    });
-    rzp.open();
+    try {
+      await initiatePayU({
+        purchase_id: purchase.id,
+        amount,
+        productinfo: 'Upgrade to Pro — Monthly Subscription',
+        firstname:   user.user_metadata?.full_name ?? user.email ?? '',
+        email:       user.email ?? '',
+        phone:       user.user_metadata?.phone ?? '0000000000',
+        udf1:        'upgrade:pro',
+      });
+    } catch (err) {
+      await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
+      toast(err instanceof Error ? err.message : 'Could not start payment.', 'error');
+      setUpgradeLoading(false);
+    }
   };
 
   if (loading) {

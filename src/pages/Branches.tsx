@@ -4,10 +4,9 @@ import { GitBranch, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { BRANCH_PACKS, toPaise } from '../lib/constants';
+import { BRANCH_PACKS } from '../lib/constants';
 import { trackEvent } from '../lib/analytics';
-
-declare global { interface Window { Razorpay: any; } }
+import { initiatePayU } from '../lib/payu';
 
 export const Branches = () => {
   const navigate = useNavigate();
@@ -24,14 +23,6 @@ export const Branches = () => {
   const [addedSlots, setAddedSlots] = useState(0);
 
   useEffect(() => { document.title = 'Add Branches | GymSetu'; }, []);
-
-  useEffect(() => {
-    if (document.getElementById('rzp-sdk')) return;
-    const s = document.createElement('script');
-    s.id = 'rzp-sdk';
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.head.appendChild(s);
-  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -56,12 +47,9 @@ export const Branches = () => {
 
   const handlePurchase = async (slots: number, price: number) => {
     if (!session || !subId || !gymId) return;
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again.', 'error');
-      return;
-    }
 
-    // 1. Create pending purchase record
+    // Create pending purchase row — payu-callback flips status to 'paid'
+    // and increments subscription.branch_slots server-side after PayU confirms.
     const { data: purchase, error: purchaseErr } = await supabase
       .from('purchases').insert({
         owner_id: session.user.id,
@@ -78,50 +66,24 @@ export const Branches = () => {
     }
 
     setPurchasing(true);
+    trackEvent('purchase_initiated', { product: 'branches', slots, price });
 
-    const rzp = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: toPaise(price),
-      currency: 'INR',
-      name: 'GymSetu',
-      description: `${slots} Branch${slots > 1 ? 'es' : ''} Add-On — Monthly`,
-      prefill: {
-        name: session.user.user_metadata?.full_name ?? '',
-        contact: session.user.user_metadata?.phone ?? '',
-      },
-      notes: { purchase_id: purchase.id, slots },
-      theme: { color: '#FF4D00' },
-      handler: async (response: { razorpay_payment_id: string }) => {
-        try {
-          const newSlots = (currentSlots ?? 0) + slots;
-
-          // 2a. Mark purchase as paid
-          await supabase.from('purchases').update({
-            status: 'paid',
-            razorpay_payment_id: response.razorpay_payment_id,
-          }).eq('id', purchase.id);
-
-          // 2b. Increment branch_slots on subscription
-          const { error: subErr } = await supabase.from('subscriptions').update({
-            branch_slots: newSlots,
-          }).eq('id', subId);
-          if (subErr) throw new Error(subErr.message);
-
-          setCurrentSlots(newSlots);
-          setAddedSlots(slots);
-          trackEvent('purchase', { product: 'branches', slots, price });
-          setSuccess(true);
-        } catch (err) {
-          // Mark purchase as failed if DB update fails
-          await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
-          toast(err instanceof Error ? err.message : 'Failed to activate branches.', 'error');
-        } finally {
-          setPurchasing(false);
-        }
-      },
-      modal: { ondismiss: () => setPurchasing(false) },
-    });
-    rzp.open();
+    try {
+      await initiatePayU({
+        purchase_id: purchase.id,
+        amount:      price,
+        productinfo: `${slots} Branch${slots > 1 ? 'es' : ''} Add-On — Monthly`,
+        firstname:   session.user.user_metadata?.full_name ?? session.user.email ?? '',
+        email:       session.user.email ?? '',
+        phone:       session.user.user_metadata?.phone ?? '0000000000',
+        udf1:        `branches:${slots}`,
+      });
+      // Browser navigates to PayU.
+    } catch (err) {
+      await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
+      toast(err instanceof Error ? err.message : 'Could not start payment.', 'error');
+      setPurchasing(false);
+    }
   };
 
   if (authLoading || loading) {

@@ -4,13 +4,12 @@ import { WaitlistForm } from '../components/WaitlistForm';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import {
-  PRICING, SAVINGS, TOKEN_PACKS, PLAN_TOKENS, CYCLE_DAYS,
-  toPaise, type BillingCycle, type PlanId,
+  PRICING, SAVINGS, TOKEN_PACKS, PLAN_TOKENS,
+  type BillingCycle, type PlanId,
 } from '../lib/constants';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../lib/analytics';
-
-declare global { interface Window { Razorpay: any; } }
+import { initiatePayU } from '../lib/payu';
 
 const CYCLES: { key: BillingCycle; label: string; tag?: string; discount: string }[] = [
   { key: 'monthly',     label: 'Monthly',     discount: '' },
@@ -82,14 +81,6 @@ export const Pricing = () => {
 
   useEffect(() => { document.title = 'Pricing | GymSetu'; }, []);
 
-  useEffect(() => {
-    if (document.getElementById('rzp-sdk')) return;
-    const s = document.createElement('script');
-    s.id = 'rzp-sdk';
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.head.appendChild(s);
-  }, []);
-
   // Load current plan for auth users
   useEffect(() => {
     if (authLoading) return;
@@ -111,14 +102,11 @@ export const Pricing = () => {
 
   const handleUpgrade = async (planId: PlanId) => {
     if (!session || !gymId || !subId) return;
-    if (typeof window.Razorpay === 'undefined') {
-      toast('Payment gateway is still loading — please try again.', 'error');
-      return;
-    }
 
     const amount = PRICING[planId][cycle];
 
-    // 1. Create pending purchase record
+    // Create pending purchase record — payu-callback flips status to 'paid'
+    // and applies the plan upgrade server-side after PayU confirms.
     const { data: purchase, error: purchaseErr } = await supabase
       .from('purchases').insert({
         owner_id: session.user.id,
@@ -136,66 +124,24 @@ export const Pricing = () => {
     }
 
     setPurchasing(true);
+    trackEvent('purchase_initiated', { product: 'plan', plan: planId, cycle, value: amount });
 
-    const rzp = new window.Razorpay({
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-      amount: toPaise(amount),
-      currency: 'INR',
-      name: 'GymSetu',
-      description: `${planId.replace(/_/g, ' ').toUpperCase()} Plan — ${cycle.replace('_', '-')}`,
-      prefill: {
-        name: session.user.user_metadata?.full_name ?? '',
-        contact: session.user.user_metadata?.phone ?? '',
-        email: session.user.email ?? '',
-      },
-      notes: { purchase_id: purchase.id, plan: planId, cycle },
-      theme: { color: '#FF4D00' },
-      handler: async (response: { razorpay_payment_id: string }) => {
-        try {
-          const now      = new Date();
-          const days     = CYCLE_DAYS[cycle];
-          const periodEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-          const monthYear = now.toISOString().slice(0, 7);
-
-          // 2a. Mark purchase as paid
-          await supabase.from('purchases').update({
-            status: 'paid',
-            razorpay_payment_id: response.razorpay_payment_id,
-          }).eq('id', purchase.id);
-
-          // 2b. Update subscription
-          const { error: subErr } = await supabase.from('subscriptions').update({
-            plan: planId,
-            billing_cycle: cycle,
-            status: 'active',
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            razorpay_payment_id: response.razorpay_payment_id,
-          }).eq('id', subId);
-          if (subErr) throw new Error(subErr.message);
-
-          // 2c. Seed / reset token allocation for new plan
-          const tokenAlloc = PLAN_TOKENS[planId];
-          if (tokenAlloc > 0) {
-            await supabase.from('subscription_tokens').upsert(
-              { gym_id: gymId, month_year: monthYear, tokens_total: tokenAlloc, tokens_used: 0 },
-              { onConflict: 'gym_id,month_year' }
-            );
-          }
-
-          setCurrentPlan(planId);
-          setUpgradeSuccess(planId);
-          trackEvent('purchase', { product: 'plan', plan: planId, cycle, value: amount });
-        } catch (err) {
-          await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
-          toast(err instanceof Error ? err.message : 'Plan upgrade failed.', 'error');
-        } finally {
-          setPurchasing(false);
-        }
-      },
-      modal: { ondismiss: () => setPurchasing(false) },
-    });
-    rzp.open();
+    try {
+      await initiatePayU({
+        purchase_id: purchase.id,
+        amount,
+        productinfo: `${planId.replace(/_/g, ' ').toUpperCase()} Plan — ${cycle.replace('_', '-')}`,
+        firstname:   session.user.user_metadata?.full_name ?? session.user.email ?? '',
+        email:       session.user.email ?? '',
+        phone:       session.user.user_metadata?.phone ?? '0000000000',
+        udf1:        planId,
+      });
+      // Browser navigates to PayU — keep purchasing=true.
+    } catch (err) {
+      await supabase.from('purchases').update({ status: 'failed' }).eq('id', purchase.id);
+      toast(err instanceof Error ? err.message : 'Could not start payment.', 'error');
+      setPurchasing(false);
+    }
   };
 
   const isReady = !authLoading && !profileLoading;

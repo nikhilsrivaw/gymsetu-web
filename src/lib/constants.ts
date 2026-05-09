@@ -81,13 +81,8 @@ export const CYCLE_DAYS = {
 
 export type BillingCycle = keyof typeof CYCLE_DAYS;
 
-// Paise helper (₹ × 100) — kept for any code still doing paise math
+// Paise helper (₹ × 100) — handy for any code still working in paise.
 export const toPaise = (amount: number) => amount * 100;
-
-// Legacy — referenced by Dashboard/Onboarding pages still on the Razorpay path.
-// Will be removed once those pages are migrated to PayU.
-export const RAZORPAY_BASIC_PAISE = PRICING.basic.monthly * 100;
-export const RAZORPAY_PRO_PAISE   = PRICING.pro.monthly * 100;
 
 // WhatsApp token top-up packs
 export const TOKEN_PACKS = [
