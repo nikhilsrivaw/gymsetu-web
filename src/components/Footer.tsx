@@ -1,46 +1,44 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { ArrowRight } from 'lucide-react';
 import { WaitlistForm } from './WaitlistForm';
-import { AppStoreBadges } from './AppStoreBadges';
 
 export const Footer = () => {
   const [showWaitlist, setShowWaitlist] = useState(false);
 
   return (
     <>
-      <footer className="bg-brand-orange text-black pt-16 md:pt-24 pb-8 md:pb-12 px-6 border-t-2 border-black">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <h2 className="font-archivo text-[18vw] md:text-[14vw] leading-[0.85] uppercase mb-8 md:mb-12">
-            READY TO<br />GROW?
-          </h2>
-
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            onClick={() => setShowWaitlist(true)}
-            className="bg-black text-white px-8 md:px-12 py-4 md:py-6 rounded-full font-archivo text-xl md:text-2xl uppercase tracking-tighter mb-8 md:mb-12"
-          >
-            START FREE TRIAL →
-          </motion.button>
-
-          <AppStoreBadges className="mb-16 md:mb-24 justify-center" />
-
-          <div className="w-full pt-8 md:pt-12 border-t-2 border-black flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
-            <div className="font-mono text-[10px] md:text-xs uppercase font-bold">
-              © {new Date().getFullYear()} GYMSETU. ALL RIGHTS RESERVED.
+      <footer className="bg-ink border-t border-bone/15 px-6 pt-16 pb-10">
+        <div className="max-w-7xl mx-auto">
+          {/* masthead sign-off */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-bone/10 pb-12">
+            <Link to="/" className="font-display uppercase leading-[0.85] tracking-tight text-bone text-6xl md:text-8xl">
+              GYM<span className="text-flame">SETU</span>
+            </Link>
+            <div className="flex flex-col items-start md:items-end gap-4">
+              <span className="font-serif italic text-xl text-bone/70">The operating system for Indian gyms.</span>
+              <button
+                onClick={() => setShowWaitlist(true)}
+                className="group inline-flex items-center gap-3 bg-flame text-black font-mono text-xs font-bold uppercase tracking-widest px-7 py-4 hover:gap-4 transition-all"
+              >
+                Start free trial <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
-            <nav aria-label="Footer navigation" className="flex gap-6 md:gap-8 font-mono text-[10px] md:text-xs uppercase font-bold">
-              <Link to="/pricing" className="hover:underline">PRICING</Link>
-              <Link to="/features" className="hover:underline">FEATURES</Link>
-              <Link to="/contact" className="hover:underline">CONTACT</Link>
+          </div>
+
+          {/* bottom bar */}
+          <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-6 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+            <span>© {new Date().getFullYear()} GymSetu · Built for Indian gyms</span>
+            <nav aria-label="Footer navigation" className="flex gap-8">
+              <Link to="/pricing" className="hover:text-flame transition-colors">Pricing</Link>
+              <Link to="/features" className="hover:text-flame transition-colors">Features</Link>
+              <Link to="/contact" className="hover:text-flame transition-colors">Contact</Link>
             </nav>
           </div>
         </div>
       </footer>
 
-      {showWaitlist && (
-        <WaitlistForm plan="pro" onClose={() => setShowWaitlist(false)} />
-      )}
+      {showWaitlist && <WaitlistForm plan="pro" onClose={() => setShowWaitlist(false)} />}
     </>
   );
 };

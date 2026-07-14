@@ -52,6 +52,22 @@ function formatAmount(rupees: number): string {
   return rupees.toFixed(2);
 }
 
+// PayU rejects non-ASCII chars in productinfo / firstname (em-dash, smart
+// quotes, accents, etc.) because their server's hash calculation uses a
+// different byte encoding than ours. Strip them down to ASCII letters,
+// numbers, spaces, and basic punctuation.
+function sanitizeForPayU(s: string, fallback: string): string {
+  const cleaned = s
+    .replace(/[‐-―]/g, '-')        // various dashes → hyphen
+    .replace(/[‘’]/g, "'")         // smart quotes → apostrophe
+    .replace(/[“”]/g, '"')         // smart double quotes
+    .replace(/[^\x20-\x7E]/g, '')            // strip everything non-ASCII-printable
+    .replace(/[^A-Za-z0-9 .,'\-_]/g, ' ')    // keep only safe chars
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned.length > 0 ? cleaned : fallback;
+}
+
 // ── Request handler ──
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -130,11 +146,18 @@ Deno.serve(async (req) => {
     }
   }
 
-  // 5. Generate txnid + hash
-  const txnid = generateTxnid('gs');
-  const amountStr = formatAmount(Number(amount));
+  // 5. Generate txnid + hash. Sanitize productinfo/firstname so the bytes
+  //    we hash exactly match what we POST (PayU is strict on encoding).
+  const txnid           = generateTxnid('gs');
+  const amountStr       = formatAmount(Number(amount));
+  const safeProductinfo = sanitizeForPayU(productinfo, 'GymSetu Plan');
+  const safeFirstname   = sanitizeForPayU(firstname, 'Customer');
+  const safeUdf1        = udf1 ? sanitizeForPayU(udf1, '') : undefined;
   const hash = await buildRequestHash({
-    key: merchantKey, txnid, amount: amountStr, productinfo, firstname, email, salt, udf1,
+    key: merchantKey, txnid, amount: amountStr,
+    productinfo: safeProductinfo, firstname: safeFirstname, email,
+    salt: salt.trim(),                              // belt-and-suspenders against trailing whitespace in the secret
+    udf1: safeUdf1,
   });
 
   // 6. Persist txnid so the callback can find the row
@@ -153,22 +176,27 @@ Deno.serve(async (req) => {
     if (updErr) return json({ error: `Failed to attach txnid: ${updErr.message}` }, 500);
   }
 
-  // 7. Return form fields for the client to POST
-  const callbackBase = `${supabaseUrl}/functions/v1/payu-callback`;
+  // 7. Return form fields for the client to POST.
+  //    The sanitized values MUST be posted (not the originals) so PayU's
+  //    server-side hash matches ours.
+  // PayU must be able to reach the callback from the public internet, so use the
+  // public URL — SUPABASE_URL is the internal gateway (kong:8000) when self-hosted.
+  const publicBase = Deno.env.get('SUPABASE_PUBLIC_URL') ?? supabaseUrl;
+  const callbackBase = `${publicBase}/functions/v1/payu-callback`;
   return json({
     payu_url: payuEndpoint(),
     fields: {
       key:         merchantKey,
       txnid,
       amount:      amountStr,
-      productinfo,
-      firstname,
+      productinfo: safeProductinfo,
+      firstname:   safeFirstname,
       email,
       phone,
       surl:        callbackBase,
       furl:        callbackBase,
       hash,
-      udf1:        udf1 ?? '',
+      udf1:        safeUdf1 ?? '',
       service_provider: 'payu_paisa',
     },
   }, 200);

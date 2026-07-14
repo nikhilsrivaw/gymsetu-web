@@ -1,48 +1,138 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-archivo: "Archivo Black", sans-serif;
+  --font-display: "Anton", sans-serif;
+  --font-serif: "Fraunces", serif;
   --font-mono: "Space Mono", monospace;
   --font-sans: "Inter", sans-serif;
+
+  /* Brand (kept for other pages) */
   --color-brand-orange: #FF4D00;
   --color-near-black: #0D0D0D;
+
+  /* Gym-OS palette */
+  --color-ink: #0A0A0B;      /* deep canvas */
+  --color-ink-2: #0F0F11;    /* raised section */
+  --color-surface: #16161A;  /* cards */
+  --color-hairline: #232327;
+  --color-flame: #FF4D00;    /* primary heat */
+  --color-ember: #FF8A3D;    /* mid heat */
+  --color-amber: #FFC24B;    /* hot tip */
+  --color-bone: #F4F1EA;     /* warm white text */
+  --color-ash: #8A8A90;      /* muted */
 }
 
 @layer base {
   body {
-    @apply bg-near-black text-white font-sans selection:bg-black selection:text-brand-orange;
+    @apply bg-ink text-bone font-sans selection:bg-flame selection:text-black;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* ── Kinetic marquee ─────────────────────────────────────────── */
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.animate-marquee { animation: marquee 28s linear infinite; }
+.animate-marquee-reverse { animation: marquee 28s linear infinite reverse; }
+
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin-slow 14s linear infinite; }
+
+/* ── Ambient heat glow ───────────────────────────────────────── */
+@keyframes float-glow {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); opacity: 0.55; }
+  50%      { transform: translate3d(3%, -5%, 0) scale(1.12); opacity: 0.8; }
+}
+.glow-orb { position: absolute; border-radius: 9999px; filter: blur(90px); pointer-events: none; will-change: transform; }
+.animate-float-glow { animation: float-glow 11s ease-in-out infinite; }
+
+/* ── Drifting technical grid ─────────────────────────────────── */
+@keyframes grid-drift { from { background-position: 0 0; } to { background-position: 72px 72px; } }
+.hud-grid {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+  animation: grid-drift 22s linear infinite;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
 }
 
-.animate-marquee {
-  animation: marquee 20s linear infinite;
+/* ── Heat gradient text + fills ──────────────────────────────── */
+.text-heat {
+  background: linear-gradient(100deg, #FF4D00 0%, #FF8A3D 48%, #FFC24B 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.bg-heat { background: linear-gradient(100deg, #FF4D00 0%, #FF8A3D 55%, #FFC24B 120%); }
+
+/* ── Film grain overlay ──────────────────────────────────────── */
+.grain::after {
+  content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.animate-marquee-reverse {
-  animation: marquee 20s linear infinite reverse;
+/* ── Live pulse dot ──────────────────────────────────────────── */
+@keyframes ping-soft { 0% { transform: scale(1); opacity: 0.7; } 75%, 100% { transform: scale(2.4); opacity: 0; } }
+.pulse-dot { position: relative; }
+.pulse-dot::before {
+  content: ""; position: absolute; inset: 0; border-radius: 9999px; background: currentColor;
+  animation: ping-soft 1.8s cubic-bezier(0,0,0.2,1) infinite;
 }
 
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* ── Marquee edge fade ───────────────────────────────────────── */
+.edge-fade { mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+
+/* ── Lit glass surfaces (premium depth) ──────────────────────── */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018));
+  border: 1px solid var(--color-hairline);
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.07), 0 30px 80px -34px rgba(0,0,0,0.85);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+}
+.glass-heat { box-shadow: inset 0 1px 0 0 rgba(255,180,120,0.14), 0 44px 130px -34px rgba(255,77,0,0.45); }
+
+/* thin lit hairline on top edge of a card */
+.top-sheen { position: relative; }
+.top-sheen::before {
+  content: ""; position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,138,61,0.6), transparent);
 }
 
-.animate-spin-slow {
-  animation: spin-slow 12s linear infinite;
+/* ── Branded hero image (grayscale → warm, cinematic) ────────── */
+.duotone { filter: grayscale(1) contrast(1.08) brightness(0.62); }
+.warm-tint { mix-blend-mode: soft-light; }
+
+/* ── Headline line reveal ────────────────────────────────────── */
+.line-mask { overflow: hidden; display: block; }
+
+/* ── Editorial (bold magazine) ───────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+.font-serif { font-family: var(--font-serif); }
+.font-hand { font-family: "Caveat", cursive; }
+
+/* ruled-paper look for the chaos panel */
+.paper-lines { background-image: repeating-linear-gradient(rgba(0,0,0,0.06) 0 1px, transparent 1px 30px); }
+
+/* cinematic photo darkening for type-over-image */
+.cine-scrim { background: linear-gradient(180deg, rgba(8,8,9,0.55) 0%, rgba(8,8,9,0.15) 35%, rgba(8,8,9,0.75) 100%); }
+.cine-scrim-l { background: linear-gradient(90deg, rgba(8,8,9,0.9) 0%, rgba(8,8,9,0.45) 45%, rgba(8,8,9,0.15) 100%); }
+.duotone-strong { filter: grayscale(1) contrast(1.15) brightness(0.7); }
+
+/* magazine drop-cap */
+.drop-cap::first-letter {
+  font-family: var(--font-serif); font-weight: 500; float: left;
+  font-size: 4.4em; line-height: 0.72; padding: 0.06em 0.12em 0 0; color: var(--color-flame);
 }
+
+/* image reveal clip */
+@keyframes img-wipe { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-reverse, .animate-spin-slow,
+  .animate-float-glow, .hud-grid, .pulse-dot::before { animation: none !important; }
 }

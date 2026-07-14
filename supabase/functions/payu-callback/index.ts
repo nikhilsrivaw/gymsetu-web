@@ -86,9 +86,11 @@ Deno.serve(async (req) => {
   const error             = get('error');
   const errorMessage      = get('error_Message');
 
-  // 2. Verify reverse hash
+  // 2. Verify reverse hash. .trim() defends against any whitespace that
+  //    may have crept into the secret value when set in the dashboard.
   const expected = await buildResponseHash({
-    key, txnid, amount, productinfo, firstname, email, status, salt,
+    key, txnid, amount, productinfo, firstname, email, status,
+    salt: salt.trim(),
     additionalCharges: additionalCharges || undefined,
     udf1: get('udf1'), udf2: get('udf2'), udf3: get('udf3'),
     udf4: get('udf4'), udf5: get('udf5'),
