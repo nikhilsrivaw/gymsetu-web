@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -103,7 +104,7 @@ function AppShell() {
           <Route path="/branches"      element={<ProtectedRoute><Branches /></ProtectedRoute>} />
           <Route path="/tokens"        element={<ProtectedRoute><Tokens /></ProtectedRoute>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/admin"         element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/admin"         element={<AdminRoute><Admin /></AdminRoute>} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failure" element={<PaymentFailure />} />
 
