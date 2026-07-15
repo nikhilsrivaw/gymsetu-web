@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
-import { Home, Zap, Tag, MessageCircle, LayoutDashboard, UserCircle } from 'lucide-react';
+import { Home, Zap, Tag, MessageCircle, LayoutDashboard, UserCircle, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useIsAdmin } from '../lib/admin';
 
 const navLinks = [
   { name: 'HOME', path: '/', icon: Home },
@@ -14,6 +15,7 @@ const navLinks = [
 export const Navbar = () => {
   const location = useLocation();
   const { session } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -62,11 +64,11 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-2">
             {session ? (
               <Link
-                to="/dashboard"
+                to={isAdmin ? '/admin' : '/dashboard'}
                 className="flex items-center gap-2 rounded-full bg-heat px-5 py-2 font-mono text-xs font-bold uppercase text-black hover:shadow-[0_10px_30px_-8px_rgba(255,77,0,0.6)] transition-shadow"
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                Dashboard
+                {isAdmin ? <ShieldCheck className="w-3.5 h-3.5" /> : <LayoutDashboard className="w-3.5 h-3.5" />}
+                {isAdmin ? 'Admin' : 'Dashboard'}
               </Link>
             ) : (
               <>
@@ -105,9 +107,9 @@ export const Navbar = () => {
           );
         })}
         {session ? (
-          <Link to="/dashboard" className={cn('flex flex-col items-center justify-center py-2 px-1 flex-1', location.pathname === '/dashboard' ? 'text-flame' : 'text-ash')}>
-            <LayoutDashboard className="w-5 h-5 mb-1" />
-            <span className="font-mono text-[8px] font-bold uppercase tracking-tight">Dash</span>
+          <Link to={isAdmin ? '/admin' : '/dashboard'} className={cn('flex flex-col items-center justify-center py-2 px-1 flex-1', [isAdmin ? '/admin' : '/dashboard'].includes(location.pathname) ? 'text-flame' : 'text-ash')}>
+            {isAdmin ? <ShieldCheck className="w-5 h-5 mb-1" /> : <LayoutDashboard className="w-5 h-5 mb-1" />}
+            <span className="font-mono text-[8px] font-bold uppercase tracking-tight">{isAdmin ? 'Admin' : 'Dash'}</span>
           </Link>
         ) : (
           <Link to="/signup" className={cn('flex flex-col items-center justify-center py-2 px-1 flex-1', ['/signup', '/login'].includes(location.pathname) ? 'text-flame' : 'text-ash')}>

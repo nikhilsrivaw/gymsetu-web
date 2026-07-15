@@ -18,6 +18,13 @@ export const AuthCallback = () => {
         return;
       }
 
+      // Platform admins go straight to the console.
+      const { data: isAdmin } = await supabase.rpc('is_super_admin');
+      if (isAdmin === true) {
+        navigate('/admin', { replace: true });
+        return;
+      }
+
       // Check if this user already has a profile (returning user vs new OAuth user)
       const { data: profile } = await supabase
         .from('profiles')

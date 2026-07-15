@@ -22,3 +22,14 @@ export function useIsAdmin() {
 
   return { isAdmin, loading: authLoading || isAdmin === null };
 }
+
+// One-shot admin check (for redirect decisions outside React state).
+export async function isAdminNow(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('is_super_admin');
+  return !error && data === true;
+}
+
+// Where a freshly-authenticated user should land: admins → console, else app.
+export async function landingPath(): Promise<string> {
+  return (await isAdminNow()) ? '/admin' : '/dashboard';
+}

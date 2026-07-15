@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { OAuthButtons } from '../components/OAuthButtons';
+import { landingPath } from '../lib/admin';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export const Login = () => {
   }, []);
 
   useEffect(() => {
-    if (session) navigate('/dashboard', { replace: true });
+    if (session) landingPath().then(p => navigate(p, { replace: true }));
   }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +39,7 @@ export const Login = () => {
       return;
     }
 
-    navigate('/dashboard');
+    navigate(await landingPath());
   };
 
   return (
