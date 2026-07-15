@@ -12,52 +12,56 @@ export const Contact = () => {
   }, []);
 
   return (
-    <main className="bg-near-black pt-32 md:pt-48 pb-24 md:pb-32 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="font-archivo text-6xl sm:text-7xl md:text-[10vw] text-white uppercase leading-none mb-16 md:mb-24 tracking-tighter">
-          WE'RE <span className="text-brand-orange">HERE</span><br />TO HELP.
+    <main className="relative bg-ink pt-32 md:pt-44 pb-24 md:pb-32 px-4 md:px-6 overflow-hidden">
+      <div className="hud-grid absolute inset-0" aria-hidden="true" />
+      <div className="glow-orb animate-float-glow" aria-hidden="true"
+        style={{ width: 520, height: 520, top: -140, right: -80, background: 'radial-gradient(circle,#FF4D0033,transparent 70%)' }} />
+
+      <div className="relative max-w-7xl mx-auto">
+        <p className="font-mono text-[11px] text-ash uppercase tracking-[0.25em] mb-4">Contact & support</p>
+        <h1 className="font-display text-6xl sm:text-7xl md:text-[8vw] text-bone uppercase leading-[0.85] mb-16 md:mb-20 tracking-tight">
+          We're <span className="text-heat">here</span><br />to help
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-24">
-          <div className="flex flex-col gap-8 md:gap-12">
-            <div className="border-2 border-brand-orange p-8 md:p-12 bg-brand-orange text-black">
-              <MessageSquare className="w-12 h-12 md:w-16 md:h-16 mb-6 md:mb-8" aria-hidden="true" />
-              <h2 className="font-archivo text-4xl md:text-5xl mb-4 uppercase">WHATSAPP SUPPORT</h2>
-              <p className="font-sans text-lg md:text-xl mb-8">Get instant help from our team via WhatsApp chat.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+          <div className="flex flex-col gap-6 md:gap-8">
+            <div className="bg-heat text-black rounded-2xl p-8 md:p-10">
+              <MessageSquare className="w-10 h-10 md:w-12 md:h-12 mb-6" aria-hidden="true" />
+              <h2 className="font-display text-3xl md:text-4xl mb-3 uppercase">WhatsApp support</h2>
+              <p className="font-sans text-base md:text-lg mb-8 text-black/80">Get instant help from our team via WhatsApp chat.</p>
               <a
                 href={`https://wa.me/${waNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                target="_blank" rel="noopener noreferrer"
                 onClick={() => trackEvent('whatsapp_click', { source: 'contact_page' })}
-                className="bg-black text-white px-6 md:px-8 py-3 md:py-4 font-archivo text-lg md:text-xl uppercase tracking-tighter flex items-center gap-4 hover:translate-x-4 transition-transform w-fit"
+                className="bg-black text-bone px-6 py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider flex items-center gap-3 hover:gap-5 transition-all w-fit"
               >
-                CHAT NOW <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                Chat now <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </a>
             </div>
 
-            <div className="border-2 border-white/20 p-8 md:p-12 text-white">
-              <Mail className="w-12 h-12 md:w-16 md:h-16 mb-6 md:mb-8 text-brand-orange" aria-hidden="true" />
-              <h2 className="font-archivo text-4xl md:text-5xl mb-4 uppercase">EMAIL US</h2>
+            <div className="glass rounded-2xl p-8 md:p-10">
+              <Mail className="w-10 h-10 md:w-12 md:h-12 mb-6 text-flame" aria-hidden="true" />
+              <h2 className="font-display text-3xl md:text-4xl mb-3 uppercase text-bone">Email us</h2>
               <a
                 href={`mailto:${SUPPORT_EMAIL}`}
-                className="font-sans text-lg md:text-xl mb-4 text-brand-orange break-all hover:underline block"
+                className="font-sans text-lg mb-3 text-flame break-all hover:underline block"
               >
                 {SUPPORT_EMAIL}
               </a>
-              <p className="font-sans text-base md:text-lg opacity-40">For general inquiries and partnership requests.</p>
+              <p className="font-sans text-base text-ash">For general inquiries and partnership requests.</p>
             </div>
 
-            <div className="border-2 border-white/20 p-8 md:p-12 text-white">
-              <Clock className="w-12 h-12 md:w-16 md:h-16 mb-6 md:mb-8 text-brand-orange" aria-hidden="true" />
-              <h2 className="font-archivo text-4xl md:text-5xl mb-8 uppercase">RESPONSE TIME</h2>
-              <div className="flex flex-col gap-6 md:gap-8">
+            <div className="glass rounded-2xl p-8 md:p-10">
+              <Clock className="w-10 h-10 md:w-12 md:h-12 mb-6 text-flame" aria-hidden="true" />
+              <h2 className="font-display text-3xl md:text-4xl mb-6 uppercase text-bone">Response time</h2>
+              <div className="flex flex-col gap-6">
                 <div>
-                  <div className="font-mono text-[10px] text-brand-orange font-bold mb-2 uppercase">WEEKDAYS</div>
-                  <div className="font-archivo text-3xl md:text-4xl uppercase">WITHIN 4 HOURS</div>
+                  <div className="font-mono text-[10px] text-flame font-bold mb-2 uppercase tracking-wider">Weekdays</div>
+                  <div className="font-display text-2xl md:text-3xl uppercase text-bone">Within 4 hours</div>
                 </div>
                 <div>
-                  <div className="font-mono text-[10px] text-brand-orange font-bold mb-2 uppercase">WEEKENDS</div>
-                  <div className="font-archivo text-3xl md:text-4xl uppercase">WITHIN 12 HOURS</div>
+                  <div className="font-mono text-[10px] text-flame font-bold mb-2 uppercase tracking-wider">Weekends</div>
+                  <div className="font-display text-2xl md:text-3xl uppercase text-bone">Within 12 hours</div>
                 </div>
               </div>
             </div>
@@ -68,22 +72,20 @@ export const Contact = () => {
           </div>
         </div>
 
-        <div className="mt-24 md:mt-32 p-8 md:p-12 border-2 border-white/10">
-          <h3 className="font-archivo text-3xl md:text-4xl text-white uppercase mb-4 text-center">
-            FREQUENTLY ASKED QUESTIONS
+        <div className="mt-20 md:mt-28 p-8 md:p-12 glass rounded-2xl">
+          <p className="font-mono text-flame font-bold uppercase mb-3 text-xs text-center tracking-widest">Have a quick question?</p>
+          <h3 className="font-display text-3xl md:text-4xl text-bone uppercase mb-12 text-center">
+            Frequently asked questions
           </h3>
-          <p className="font-mono text-brand-orange font-bold uppercase mb-12 text-xs md:text-base text-center">
-            HAVE A QUICK QUESTION?
-          </p>
           <div className="max-w-3xl mx-auto flex flex-col gap-6 md:gap-8 text-left">
             {[
               { q: 'Do I need to be tech-savvy to use GymSetu?',       a: 'If you can use WhatsApp, you can use GymSetu. Setup takes under 10 minutes.' },
               { q: 'What happens after the 7-day free trial?',          a: 'You\'re automatically moved to the Pro plan at ₹1,699/month. You can cancel anytime before the trial ends.' },
               { q: 'Is my data safe?',                                  a: 'Yes. All data is encrypted and stored on secure servers. We never share your data.' },
             ].map((faq, i) => (
-              <div key={i} className="border-b border-white/10 pb-6 md:pb-8">
-                <h4 className="font-archivo text-xl md:text-2xl text-white uppercase mb-4">{faq.q}</h4>
-                <p className="font-sans text-white/60 text-base md:text-lg">{faq.a}</p>
+              <div key={i} className="border-b border-hairline pb-6 md:pb-8">
+                <h4 className="font-display text-xl md:text-2xl text-bone uppercase mb-3">{faq.q}</h4>
+                <p className="font-sans text-ash text-base md:text-lg">{faq.a}</p>
               </div>
             ))}
           </div>

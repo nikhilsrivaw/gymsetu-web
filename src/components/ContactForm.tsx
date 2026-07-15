@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../lib/analytics';
+import { authInput, authLabel } from './AuthShell';
 
 export const ContactForm = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -38,12 +39,12 @@ export const ContactForm = () => {
 
   if (success) {
     return (
-      <div className="border-2 border-white/20 p-8 md:p-12 text-white text-center flex flex-col items-center justify-center min-h-[300px]">
-        <div className="w-12 h-12 bg-brand-orange flex items-center justify-center mb-6">
+      <div className="glass rounded-2xl p-8 md:p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <div className="w-12 h-12 rounded-xl bg-heat grid place-items-center mb-6">
           <Check className="w-6 h-6 text-black" strokeWidth={3} aria-hidden="true" />
         </div>
-        <div className="font-archivo text-3xl md:text-4xl text-brand-orange uppercase mb-4">MESSAGE SENT!</div>
-        <p className="font-sans text-white/60 text-base">
+        <div className="font-display text-3xl md:text-4xl text-heat uppercase mb-4">Message sent!</div>
+        <p className="font-sans text-ash text-base">
           We'll get back to you shortly. For faster help, WhatsApp us directly.
         </p>
       </div>
@@ -51,65 +52,47 @@ export const ContactForm = () => {
   }
 
   return (
-    <div className="border-2 border-white/20 p-8 md:p-12 text-white">
-      <h2 className="font-archivo text-3xl md:text-4xl uppercase mb-8">SEND A MESSAGE</h2>
+    <div className="glass rounded-2xl p-8 md:p-10">
+      <h2 className="font-display text-3xl md:text-4xl uppercase mb-8 text-bone">Send a message</h2>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
         <div>
-          <label htmlFor="ct_name" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-            Your Name
-          </label>
+          <label htmlFor="ct_name" className={authLabel}>Your name</label>
           <input
-            id="ct_name"
-            type="text"
-            autoComplete="name"
+            id="ct_name" type="text" autoComplete="name"
             value={form.name}
             onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            placeholder="Rajesh Kumar"
-            className="w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+            placeholder="Rajesh Kumar" className={authInput}
           />
         </div>
 
         <div>
-          <label htmlFor="ct_email" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-            Email Address
-          </label>
+          <label htmlFor="ct_email" className={authLabel}>Email address</label>
           <input
-            id="ct_email"
-            type="email"
-            autoComplete="email"
+            id="ct_email" type="email" autoComplete="email"
             value={form.email}
             onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            placeholder="rajesh@ironbeast.in"
-            className="w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+            placeholder="rajesh@ironbeast.in" className={authInput}
           />
         </div>
 
         <div>
-          <label htmlFor="ct_message" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-            Message *
-          </label>
+          <label htmlFor="ct_message" className={authLabel}>Message *</label>
           <textarea
-            id="ct_message"
-            required
-            value={form.message}
+            id="ct_message" required value={form.message}
             onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-            placeholder="How can we help you?"
-            rows={5}
-            className="w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors resize-none"
+            placeholder="How can we help you?" rows={5}
+            className={`${authInput} resize-none`}
           />
         </div>
 
-        {error && (
-          <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">{error}</p>
-        )}
+        {error && <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">{error}</p>}
 
         <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50"
+          type="submit" disabled={loading}
+          className="w-full bg-heat text-black py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          {loading ? 'SENDING...' : 'SEND MESSAGE →'}
+          {loading ? 'Sending…' : 'Send message →'}
         </button>
       </form>
     </div>

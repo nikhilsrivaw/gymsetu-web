@@ -45,21 +45,21 @@ export const AuthCallback = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-near-black flex items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-ink flex items-center justify-center px-6 text-center">
         <div>
-          <p className="font-mono text-[10px] text-red-400 uppercase font-bold mb-4">{error}</p>
-          <p className="font-sans text-white/40 text-sm">Redirecting you back...</p>
+          <p className="font-mono text-[10px] text-red-400 uppercase font-bold mb-4 tracking-wider">{error}</p>
+          <p className="font-sans text-ash text-sm">Redirecting you back…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-near-black flex items-center justify-center">
+    <div className="min-h-screen bg-ink flex items-center justify-center">
       <div className="text-center">
-        <div className="w-8 h-8 border-2 border-brand-orange border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="font-mono text-[10px] uppercase font-bold text-white/30 animate-pulse">
-          SIGNING YOU IN...
+        <div className="w-8 h-8 border-2 border-flame border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="font-mono text-[10px] uppercase font-bold text-ash tracking-widest animate-pulse">
+          Signing you in…
         </p>
       </div>
     </div>

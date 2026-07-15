@@ -33,26 +33,37 @@ const featureCategories = [
 
 export const Features = () => {
   return (
-    <main className="bg-near-black pt-32 md:pt-48 pb-24 md:pb-32 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="font-archivo text-6xl sm:text-7xl md:text-[10vw] text-white uppercase leading-none mb-16 md:mb-24 tracking-tighter">
-          EVERYTHING <span className="text-brand-orange">UNLOCKED.</span>
+    <main className="relative bg-ink pt-32 md:pt-44 pb-24 md:pb-32 px-4 md:px-6 overflow-hidden">
+      <div className="hud-grid absolute inset-0" aria-hidden="true" />
+      <div className="glow-orb animate-float-glow" aria-hidden="true"
+        style={{ width: 540, height: 540, top: -160, left: '20%', background: 'radial-gradient(circle,#FF4D0030,transparent 70%)' }} />
+
+      <div className="relative max-w-7xl mx-auto">
+        <p className="font-mono text-[11px] text-ash uppercase tracking-[0.25em] mb-4">Features</p>
+        <h1 className="font-display text-6xl sm:text-7xl md:text-[8vw] text-bone uppercase leading-[0.85] mb-16 md:mb-24 tracking-tight">
+          Everything <span className="text-heat">unlocked</span>
         </h1>
 
-        <div className="flex flex-col gap-20 md:gap-32">
-          {featureCategories.map((cat) => (
+        <div className="flex flex-col gap-16 md:gap-24">
+          {featureCategories.map((cat, ci) => (
             <div key={cat.title}>
-              <h2 className="font-mono text-brand-orange text-lg md:text-xl font-bold mb-8 md:mb-12 tracking-widest border-b-2 border-brand-orange pb-2 md:pb-4 inline-block">
-                {cat.title}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="flex items-center gap-3 mb-8 md:mb-10">
+                <span className="font-mono text-flame text-xs font-bold tracking-[0.2em]">
+                  {String(ci + 1).padStart(2, '0')}
+                </span>
+                <h2 className="font-mono text-bone text-sm md:text-base font-bold tracking-[0.2em] uppercase">
+                  {cat.title}
+                </h2>
+                <div className="flex-1 h-px bg-hairline" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                 {cat.features.map((feature, i) => (
-                  <div key={i} className="border-2 border-white/10 p-8 md:p-10 hover:border-brand-orange transition-all group">
-                    <div className="text-brand-orange w-10 h-10 md:w-12 md:h-12 mb-6 md:mb-8 group-hover:scale-110 transition-transform">
+                  <div key={i} className="glass rounded-2xl p-7 md:p-8 hover:border-flame/40 transition-all group">
+                    <div className="text-flame w-9 h-9 md:w-10 md:h-10 mb-6 group-hover:scale-110 transition-transform">
                       {feature.icon}
                     </div>
-                    <h3 className="font-archivo text-2xl md:text-3xl text-white uppercase mb-4">{feature.title}</h3>
-                    <p className="font-sans text-white/60 text-base md:text-lg leading-relaxed">{feature.desc}</p>
+                    <h3 className="font-display text-xl md:text-2xl text-bone uppercase mb-3">{feature.title}</h3>
+                    <p className="font-sans text-ash text-sm md:text-base leading-relaxed">{feature.desc}</p>
                   </div>
                 ))}
               </div>

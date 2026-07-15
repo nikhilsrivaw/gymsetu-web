@@ -95,49 +95,53 @@ export const Tokens = () => {
 
   if (authLoading || loading) {
     return (
-      <main className="bg-near-black min-h-screen flex items-center justify-center">
-        <div className="font-mono text-[10px] uppercase font-bold text-white/30 animate-pulse">LOADING...</div>
+      <main className="bg-ink min-h-screen flex items-center justify-center">
+        <div className="font-mono text-[11px] uppercase font-bold text-ash tracking-widest animate-pulse">Loading…</div>
       </main>
     );
   }
 
-  const labelCls = 'font-mono text-[10px] uppercase font-bold text-white/40 block mb-1';
+  const labelCls = 'font-mono text-[10px] uppercase tracking-wider text-ash block mb-1';
 
   return (
-    <main className="bg-near-black min-h-screen px-4 pt-32 md:pt-48 pb-24">
-      <div className="max-w-3xl mx-auto">
+    <main className="relative bg-ink min-h-screen px-4 pt-32 md:pt-44 pb-24 overflow-hidden">
+      <div className="hud-grid absolute inset-0" aria-hidden="true" />
+      <div className="glow-orb animate-float-glow" aria-hidden="true"
+        style={{ width: 480, height: 480, top: -120, right: -80, background: 'radial-gradient(circle,#FF4D0030,transparent 70%)' }} />
+
+      <div className="relative max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-4">
-          <MessageSquare className="w-6 h-6 text-brand-orange" />
-          <span className="font-mono text-[10px] text-brand-orange uppercase font-bold tracking-widest">WHATSAPP TOKENS</span>
+          <MessageSquare className="w-5 h-5 text-flame" />
+          <span className="font-mono text-[10px] text-flame uppercase font-bold tracking-[0.2em]">WhatsApp tokens</span>
         </div>
-        <h1 className="font-archivo text-5xl md:text-6xl text-white uppercase leading-none tracking-tighter mb-4">
-          TOP UP YOUR<br /><span className="text-brand-orange">TOKENS.</span>
+        <h1 className="font-display text-5xl md:text-6xl text-bone uppercase leading-[0.9] mb-4">
+          Top up your <span className="text-heat">tokens</span>
         </h1>
-        <p className="font-sans text-white/40 text-base mb-10 max-w-xl">
+        <p className="font-sans text-ash text-base mb-10 max-w-xl">
           Ran out of WhatsApp messages this month? Top up instantly — tokens are added to your current month's pool right away.
         </p>
 
         {/* Balance bar */}
         {plan && (
-          <div className="bg-white/5 border border-white/10 p-5 mb-10 grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="glass rounded-2xl p-5 mb-10 grid grid-cols-2 md:grid-cols-4 gap-5">
             <div>
-              <p className={labelCls}>PLAN</p>
-              <p className="font-mono text-sm font-bold text-brand-orange uppercase">{plan.replace(/_/g, ' ')}</p>
+              <p className={labelCls}>Plan</p>
+              <p className="font-mono text-sm font-bold text-flame uppercase">{plan.replace(/_/g, ' ')}</p>
             </div>
             <div>
-              <p className={labelCls}>MONTHLY ALLOCATION</p>
-              <p className="font-archivo text-2xl text-white">{PLAN_TOKENS[plan].toLocaleString('en-IN')}</p>
+              <p className={labelCls}>Monthly allocation</p>
+              <p className="font-display text-2xl text-bone">{PLAN_TOKENS[plan].toLocaleString('en-IN')}</p>
             </div>
             {tokensTotal !== null && (
               <div>
-                <p className={labelCls}>TOTAL THIS MONTH</p>
-                <p className="font-archivo text-2xl text-white">{tokensTotal.toLocaleString('en-IN')}</p>
+                <p className={labelCls}>Total this month</p>
+                <p className="font-display text-2xl text-bone">{tokensTotal.toLocaleString('en-IN')}</p>
               </div>
             )}
             {remaining !== null && (
               <div>
-                <p className={labelCls}>REMAINING</p>
-                <p className={`font-archivo text-2xl ${remaining < 50 ? 'text-red-400' : 'text-white'}`}>
+                <p className={labelCls}>Remaining</p>
+                <p className={`font-display text-2xl ${remaining < 50 ? 'text-red-400' : 'text-bone'}`}>
                   {remaining.toLocaleString('en-IN')}
                 </p>
               </div>
@@ -146,54 +150,54 @@ export const Tokens = () => {
         )}
 
         {!hasWhatsApp && (
-          <div className="border-2 border-white/10 p-6 mb-10 text-center">
-            <p className="font-mono text-[10px] font-bold text-white/40 uppercase mb-2">UPGRADE REQUIRED</p>
-            <p className="font-sans text-white/60 text-sm mb-4">
+          <div className="glass rounded-2xl p-6 mb-10 text-center">
+            <p className="font-mono text-[10px] font-bold text-ash uppercase tracking-wider mb-2">Upgrade required</p>
+            <p className="font-sans text-ash text-sm mb-4">
               WhatsApp tokens are available on Pro, Pro Plus, and Pro Max plans only.
             </p>
             <a href="/pricing"
-              className="inline-block bg-brand-orange text-black px-6 py-3 font-archivo text-base uppercase tracking-tighter hover:opacity-90 transition-opacity">
-              VIEW PLANS →
+              className="inline-block bg-heat text-black px-6 py-3 rounded-lg font-mono text-xs uppercase font-bold tracking-wider hover:opacity-90 transition-opacity">
+              View plans →
             </a>
           </div>
         )}
 
         {lastAdded && (
-          <div className="mb-10 border-2 border-brand-orange bg-brand-orange/10 p-6 text-center">
-            <Check className="w-8 h-8 text-brand-orange mx-auto mb-2" strokeWidth={3} />
-            <p className="font-archivo text-xl text-brand-orange uppercase">
-              +{lastAdded.toLocaleString('en-IN')} TOKENS ADDED!
+          <div className="mb-10 glass glass-heat top-sheen rounded-2xl p-6 text-center">
+            <Check className="w-8 h-8 text-flame mx-auto mb-2" strokeWidth={3} />
+            <p className="font-display text-xl text-heat uppercase">
+              +{lastAdded.toLocaleString('en-IN')} tokens added!
             </p>
-            <p className="font-mono text-[10px] text-white/50 uppercase font-bold mt-1">
+            <p className="font-mono text-[10px] text-ash uppercase font-bold mt-1">
               New balance: {(tokensTotal ?? 0).toLocaleString('en-IN')} tokens this month
             </p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {TOKEN_PACKS.map(pack => (
             <div key={pack.name}
-              className="border-2 border-white/20 p-8 flex flex-col hover:border-brand-orange/50 transition-colors">
+              className="glass rounded-2xl p-7 flex flex-col hover:border-flame/40 transition-colors">
               <div className="flex items-center gap-2 mb-3">
-                <Zap className="w-4 h-4 text-brand-orange" />
-                <p className="font-mono text-[10px] font-bold text-brand-orange uppercase">{pack.name}</p>
+                <Zap className="w-4 h-4 text-flame" />
+                <p className="font-mono text-[10px] font-bold text-flame uppercase tracking-wider">{pack.name}</p>
               </div>
-              <p className="font-archivo text-4xl text-white mb-0.5">{pack.tokens.toLocaleString('en-IN')}</p>
-              <p className="font-mono text-[10px] text-white/30 uppercase font-bold mb-3">TOKENS</p>
-              <p className="font-archivo text-3xl text-white mb-0.5">₹{pack.price}</p>
-              <p className="font-mono text-[9px] text-white/20 uppercase font-bold mb-8">+18% GST applicable</p>
+              <p className="font-display text-4xl text-bone mb-0.5">{pack.tokens.toLocaleString('en-IN')}</p>
+              <p className="font-mono text-[10px] text-ash uppercase font-bold mb-3">tokens</p>
+              <p className="font-display text-3xl text-heat mb-0.5">₹{pack.price}</p>
+              <p className="font-mono text-[9px] text-ash/60 uppercase font-bold mb-8">+18% GST applicable</p>
 
               <button onClick={() => handlePurchase(pack.tokens, pack.price)}
                 disabled={purchasing || !hasWhatsApp}
-                className="mt-auto w-full bg-brand-orange text-black py-3 font-archivo text-lg uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50">
-                {purchasing ? 'PROCESSING...' : 'BUY NOW →'}
+                className="mt-auto w-full bg-heat text-black py-3 rounded-lg font-mono text-xs uppercase font-bold tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50">
+                {purchasing ? 'Processing…' : 'Buy now →'}
               </button>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 border border-white/10 p-5">
-          <p className="font-mono text-[10px] font-bold text-white/30 uppercase mb-3">HOW TOKENS WORK</p>
+        <div className="mt-12 glass rounded-2xl p-6">
+          <p className="font-mono text-[10px] font-bold text-ash uppercase tracking-wider mb-3">How tokens work</p>
           <ul className="flex flex-col gap-2.5">
             {[
               '1 WhatsApp message = 1 token consumed',
@@ -202,8 +206,8 @@ export const Tokens = () => {
               'Token pool is shared across all branches under your gym account',
             ].map((tip, i) => (
               <li key={i} className="flex items-start gap-2.5">
-                <span className="font-mono text-[9px] text-white/20 mt-0.5 flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                <span className="font-sans text-xs text-white/40 leading-relaxed">{tip}</span>
+                <span className="font-mono text-[9px] text-flame/70 mt-0.5 flex-shrink-0 font-bold">{String(i + 1).padStart(2, '0')}</span>
+                <span className="font-sans text-xs text-ash leading-relaxed">{tip}</span>
               </li>
             ))}
           </ul>
