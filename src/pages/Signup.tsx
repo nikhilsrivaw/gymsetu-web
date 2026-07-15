@@ -4,24 +4,25 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { OAuthButtons } from '../components/OAuthButtons';
+import { AuthShell, authInput, authLabel } from '../components/AuthShell';
 import { MIN_PASSWORD_LENGTH } from '../lib/constants';
 
 const StepIndicator = ({ step }: { step: 1 | 2 | 3 }) => (
   <div className="flex items-center gap-2 mb-8">
     {([1, 2, 3] as const).map((n, i) => {
-      const labels = ['ACCOUNT', 'PLAN', 'GYM INFO'];
+      const labels = ['Account', 'Plan', 'Gym info'];
       const done = n < step;
       const active = n === step;
       return (
         <React.Fragment key={n}>
-          {i > 0 && <div className="flex-1 h-px bg-white/10" />}
+          {i > 0 && <div className={`flex-1 h-px ${done ? 'bg-flame/50' : 'bg-hairline'}`} />}
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className={`w-6 h-6 flex items-center justify-center font-mono text-[10px] font-bold ${
-              done ? 'bg-white/20 text-white/50' : active ? 'bg-brand-orange text-black' : 'border border-white/20 text-white/30'
+            <span className={`w-6 h-6 grid place-items-center rounded-full font-mono text-[10px] font-bold ${
+              done ? 'bg-flame/20 text-flame' : active ? 'bg-heat text-black' : 'border border-hairline text-ash'
             }`}>
               {done ? '✓' : n}
             </span>
-            <span className={`font-mono text-[10px] font-bold uppercase ${active ? 'text-white' : 'text-white/30'}`}>
+            <span className={`font-mono text-[9px] font-bold uppercase tracking-wider ${active ? 'text-bone' : 'text-ash'}`}>
               {labels[i]}
             </span>
           </div>
@@ -73,62 +74,50 @@ export const Signup = () => {
   };
 
   return (
-    <main className="bg-near-black min-h-screen flex items-center justify-center px-4 pt-24 pb-16">
-      <div className="w-full max-w-sm">
-        <StepIndicator step={1} />
+    <AuthShell>
+      <StepIndicator step={1} />
 
-        <h1 className="font-archivo text-5xl md:text-6xl text-white uppercase mb-2 leading-none tracking-tighter">
-          CREATE YOUR<br /><span className="text-brand-orange">ACCOUNT.</span>
+      <div className="mb-6">
+        <p className="font-mono text-[10px] text-ash uppercase tracking-[0.2em] mb-2">Step 1 of 3</p>
+        <h1 className="font-display text-4xl md:text-5xl text-bone uppercase leading-[0.9]">
+          Create your <span className="text-heat">account</span>
         </h1>
-        <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-8">STEP 1 OF 3</p>
+      </div>
 
+      <div className="glass rounded-2xl p-7 md:p-8">
         <OAuthButtons />
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="font-mono text-[10px] text-white/30 uppercase font-bold">OR SIGN UP WITH EMAIL</span>
-          <div className="flex-1 h-px bg-white/10" />
+          <div className="flex-1 h-px bg-hairline" />
+          <span className="font-mono text-[9px] text-ash uppercase tracking-wider">or with email</span>
+          <div className="flex-1 h-px bg-hairline" />
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <div>
-            <label htmlFor="su_email" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-              Email Address
-            </label>
+            <label htmlFor="su_email" className={authLabel}>Email address</label>
             <input
-              id="su_email"
-              type="email"
-              required
-              autoComplete="email"
+              id="su_email" type="email" required autoComplete="email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              placeholder="rajesh@ironbeast.in"
-              className="w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+              placeholder="rajesh@ironbeast.in" className={authInput}
             />
           </div>
 
           <div>
-            <label htmlFor="su_password" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-              Password <span className="opacity-50">(min. {MIN_PASSWORD_LENGTH} chars)</span>
+            <label htmlFor="su_password" className={authLabel}>
+              Password <span className="text-ash/60 normal-case">(min. {MIN_PASSWORD_LENGTH} chars)</span>
             </label>
             <div className="relative">
               <input
-                id="su_password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                minLength={MIN_PASSWORD_LENGTH}
-                autoComplete="new-password"
-                value={form.password}
+                id="su_password" type={showPassword ? 'text' : 'password'} required
+                minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                placeholder="Create a strong password"
-                className="w-full bg-black border border-white/10 text-white px-4 py-3 pr-12 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+                placeholder="Create a strong password" className={`${authInput} pr-12`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(s => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
+              <button type="button" onClick={() => setShowPassword(s => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-bone transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
@@ -137,26 +126,20 @@ export const Signup = () => {
           {error && (
             <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">
               {error}{' '}
-              {error.includes('already registered') && (
-                <Link to="/login" className="underline">Log in →</Link>
-              )}
+              {error.includes('already registered') && <Link to="/login" className="underline">Log in →</Link>}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'CREATING ACCOUNT...' : 'CONTINUE →'}
+          <button type="submit" disabled={loading}
+            className="w-full bg-heat text-black py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50 mt-1">
+            {loading ? 'Creating account…' : 'Continue →'}
           </button>
-
-          <p className="text-center font-mono text-[10px] text-white/30 uppercase font-bold">
-            ALREADY HAVE AN ACCOUNT?{' '}
-            <Link to="/login" className="text-brand-orange hover:underline">LOG IN →</Link>
-          </p>
         </form>
       </div>
-    </main>
+
+      <p className="text-center font-mono text-[10px] text-ash uppercase tracking-wider mt-6">
+        Already have an account? <Link to="/login" className="text-flame hover:underline">Log in →</Link>
+      </p>
+    </AuthShell>
   );
 };

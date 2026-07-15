@@ -35,7 +35,7 @@ export const OAuthButtons = () => {
         type="button"
         onClick={() => handleOAuth('google')}
         disabled={loading !== null}
-        className="w-full flex items-center justify-center gap-3 bg-white text-[#1f1f1f] px-4 py-3 font-sans text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 bg-bone text-[#1f1f1f] px-4 py-3 rounded-lg font-sans text-sm font-medium hover:bg-white transition-colors disabled:opacity-50"
       >
         {loading === 'google' ? (
           <span className="font-mono text-xs uppercase font-bold text-black">REDIRECTING...</span>
@@ -58,7 +58,7 @@ export const OAuthButtons = () => {
         type="button"
         onClick={() => handleOAuth('apple')}
         disabled={loading !== null}
-        className="w-full flex items-center justify-center gap-3 bg-black text-white border-2 border-white/20 px-4 py-3 font-sans text-sm font-medium hover:border-white/40 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-3 bg-surface text-bone border border-hairline px-4 py-3 rounded-lg font-sans text-sm font-medium hover:border-flame/50 transition-colors disabled:opacity-50"
       >
         {loading === 'apple' ? (
           <span className="font-mono text-xs uppercase font-bold">REDIRECTING...</span>

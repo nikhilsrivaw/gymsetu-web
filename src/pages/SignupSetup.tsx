@@ -8,6 +8,7 @@ import { trackEvent } from '../lib/analytics';
 import { initiatePayU } from '../lib/payu';
 import { AppStoreBadges } from '../components/AppStoreBadges';
 import { StepIndicator } from './Signup';
+import { AuthShell, authInput, authLabel } from '../components/AuthShell';
 import { CYCLE_DAYS, PLAN_TOKENS, PRICING, type BillingCycle, type PlanId } from '../lib/constants';
 
 function validatePhone(phone: string) {
@@ -207,48 +208,51 @@ export const SignupSetup = () => {
   // ── Success screen (Pro trial only — paid plans land on /payment/success) ─
   if (done) {
     return (
-      <main className="bg-near-black min-h-screen flex items-center justify-center px-4 pt-24 pb-16">
-        <div className="w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-brand-orange flex items-center justify-center mx-auto mb-8">
+      <AuthShell width="md">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-2xl bg-heat grid place-items-center mx-auto mb-8">
             <Check className="w-8 h-8 text-black" strokeWidth={3} />
           </div>
-          <h1 className="font-archivo text-4xl md:text-5xl text-white uppercase mb-4 leading-tight tracking-tighter">
-            YOUR GYM<br />IS LIVE!
+          <h1 className="font-display text-4xl md:text-5xl text-bone uppercase mb-4 leading-[0.95]">
+            Your gym <span className="text-heat">is live</span>
           </h1>
-          <p className="font-sans text-white/60 text-base mb-6 leading-relaxed">
+          <p className="font-sans text-ash text-base mb-6 leading-relaxed">
             Download the GymSetu app and sign in to start managing your gym.
           </p>
-          <div className="bg-[#141414] border border-white/10 px-4 py-3 inline-block mb-8">
-            <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-1">LOG IN WITH</p>
-            <p className="font-mono text-sm text-brand-orange font-bold">{successEmail}</p>
+          <div className="glass rounded-xl px-4 py-3 inline-block mb-8">
+            <p className="font-mono text-[10px] text-ash uppercase tracking-wider mb-1">Log in with</p>
+            <p className="font-mono text-sm text-flame font-bold">{successEmail}</p>
           </div>
           <AppStoreBadges theme="light" className="justify-center mb-8" />
-          <button
-            onClick={() => navigate('/dashboard', { replace: true })}
-            className="font-mono text-[10px] text-white/30 uppercase font-bold hover:text-brand-orange transition-colors"
-          >
-            VIEW SUBSCRIPTION DASHBOARD →
-          </button>
+          <div>
+            <button
+              onClick={() => navigate('/dashboard', { replace: true })}
+              className="font-mono text-[10px] text-ash uppercase font-bold tracking-wider hover:text-flame transition-colors"
+            >
+              View subscription dashboard →
+            </button>
+          </div>
         </div>
-      </main>
+      </AuthShell>
     );
   }
 
   // ── Form ─────────────────────────────────────────────────────────────────
   const isPaidPlan = plan !== 'pro';
   const payAmount  = PRICING[plan][cycle];
-  const inputCls   = 'w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors';
-  const labelCls   = 'font-mono text-[10px] uppercase font-bold text-white/40 block mb-1';
+  const inputCls   = authInput;
+  const labelCls   = authLabel;
 
   return (
-    <main className="bg-near-black min-h-screen px-4 pt-24 pb-16">
-      <div className="max-w-lg mx-auto">
-        <StepIndicator step={3} />
+    <AuthShell width="md">
+      <StepIndicator step={3} />
 
-        <h1 className="font-archivo text-5xl md:text-6xl text-white uppercase mb-2 leading-none tracking-tighter">
-          YOUR GYM<br /><span className="text-brand-orange">DETAILS.</span>
+      <div className="mb-8">
+        <p className="font-mono text-[10px] text-ash uppercase tracking-[0.2em] mb-2">Step 3 of 3 — almost done</p>
+        <h1 className="font-display text-4xl md:text-5xl text-bone uppercase leading-[0.9]">
+          Your gym <span className="text-heat">details</span>
         </h1>
-        <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-10">STEP 3 OF 3 — ALMOST DONE</p>
+      </div>
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
 
@@ -275,19 +279,19 @@ export const SignupSetup = () => {
             </label>
             {logoPreview ? (
               <div className="relative inline-block">
-                <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-cover border border-white/10" />
+                <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-cover rounded-xl border border-hairline" />
                 <button type="button" onClick={removeLogo}
-                  className="absolute -top-2 -right-2 bg-black border border-white/20 text-white rounded-full p-0.5 hover:bg-red-500 transition-colors"
+                  className="absolute -top-2 -right-2 bg-ink border border-hairline text-bone rounded-full p-0.5 hover:bg-red-500 hover:border-red-500 transition-colors"
                   aria-label="Remove logo">
                   <X className="w-3 h-3" />
                 </button>
               </div>
             ) : (
               <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full border border-dashed border-white/20 py-8 flex flex-col items-center gap-2 hover:border-brand-orange transition-colors">
-                <Upload className="w-5 h-5 text-white/30" />
-                <span className="font-mono text-[10px] text-white/30 uppercase font-bold">
-                  CLICK TO UPLOAD — JPG, PNG OR WEBP, MAX 2MB
+                className="w-full border border-dashed border-hairline rounded-lg py-8 flex flex-col items-center gap-2 hover:border-flame transition-colors">
+                <Upload className="w-5 h-5 text-ash" />
+                <span className="font-mono text-[10px] text-ash uppercase tracking-wider">
+                  Click to upload — JPG, PNG or WebP, max 2MB
                 </span>
               </button>
             )}
@@ -306,7 +310,7 @@ export const SignupSetup = () => {
               placeholder="Tell members what makes your gym special..."
               className={`${inputCls} resize-none`} />
             <p className={`font-mono text-[10px] font-bold text-right mt-1 ${
-              form.description.length > MAX_DESC * 0.9 ? 'text-yellow-400' : 'text-white/20'
+              form.description.length > MAX_DESC * 0.9 ? 'text-amber' : 'text-ash/60'
             }`}>{form.description.length} / {MAX_DESC}</p>
           </div>
 
@@ -328,41 +332,40 @@ export const SignupSetup = () => {
 
           {/* Payment summary for paid plans */}
           {isPaidPlan && (
-            <div className="bg-white/5 border border-white/10 p-4 flex items-center justify-between">
+            <div className="glass rounded-xl p-4 flex items-center justify-between">
               <div>
-                <p className="font-mono text-[9px] font-bold text-white/30 uppercase mb-0.5">
-                  {plan.replace(/_/g, ' ').toUpperCase()} — {CYCLE_LABEL[cycle].toUpperCase()}
+                <p className="font-mono text-[9px] font-bold text-ash uppercase tracking-wider mb-0.5">
+                  {plan.replace(/_/g, ' ')} — {CYCLE_LABEL[cycle]}
                 </p>
-                <p className="font-mono text-[9px] text-white/20">+18% GST applicable</p>
+                <p className="font-mono text-[9px] text-ash/60">+18% GST applicable</p>
               </div>
-              <p className="font-archivo text-2xl text-brand-orange">
+              <p className="font-display text-2xl text-heat">
                 ₹{payAmount.toLocaleString('en-IN')}
               </p>
             </div>
           )}
 
           <button type="submit" disabled={loading}
-            className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50">
+            className="w-full bg-heat text-black py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50">
             {loading
-              ? (isPaidPlan ? 'REDIRECTING TO PAYU...' : 'PLEASE WAIT...')
+              ? (isPaidPlan ? 'Redirecting to PayU…' : 'Please wait…')
               : plan === 'pro'
-                ? 'START FREE TRIAL →'
-                : `PAY ₹${payAmount.toLocaleString('en-IN')} & LAUNCH →`}
+                ? 'Start free trial →'
+                : `Pay ₹${payAmount.toLocaleString('en-IN')} & launch →`}
           </button>
 
           {plan === 'pro' && (
-            <p className="text-center font-mono text-[10px] text-white/20 uppercase font-bold -mt-2">
-              7 DAYS FREE — NO CARD REQUIRED
+            <p className="text-center font-mono text-[10px] text-ash uppercase font-bold tracking-wider -mt-2">
+              7 days free — no card required
             </p>
           )}
 
           {isPaidPlan && (
-            <p className="text-center font-mono text-[10px] text-white/20 uppercase font-bold -mt-2">
-              SECURED BY PAYU — REDIRECTS TO PAYMENT PAGE
+            <p className="text-center font-mono text-[10px] text-ash uppercase font-bold tracking-wider -mt-2">
+              Secured by PayU — redirects to payment page
             </p>
           )}
         </form>
-      </div>
-    </main>
+    </AuthShell>
   );
 };

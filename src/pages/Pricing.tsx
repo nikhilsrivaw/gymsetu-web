@@ -147,47 +147,49 @@ export const Pricing = () => {
   const isReady = !authLoading && !profileLoading;
 
   return (
-    <main className="bg-near-black pt-32 md:pt-48 pb-24 md:pb-32 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="font-archivo text-6xl sm:text-7xl md:text-[10vw] text-white uppercase leading-none mb-12 md:mb-16 tracking-tighter">
-          SIMPLE, <span className="text-brand-orange">HONEST</span><br />PRICING.
+    <main className="relative bg-ink pt-32 md:pt-44 pb-24 md:pb-32 px-4 md:px-6 overflow-hidden">
+      <div className="hud-grid absolute inset-0" aria-hidden="true" />
+      <div className="glow-orb animate-float-glow" aria-hidden="true"
+        style={{ width: 560, height: 560, top: -160, left: '25%', background: 'radial-gradient(circle,#FF4D0033,transparent 70%)' }} />
+
+      <div className="relative max-w-7xl mx-auto">
+        <p className="font-mono text-[11px] text-ash uppercase tracking-[0.25em] mb-4">Pricing</p>
+        <h1 className="font-display text-6xl sm:text-7xl md:text-[9vw] text-bone uppercase leading-[0.85] mb-3 tracking-tight">
+          Simple, <span className="text-heat">honest</span><br />pricing
         </h1>
+        <p className="font-sans text-ash text-base md:text-lg max-w-md mb-12 md:mb-14">
+          Every plan is a flat monthly fee. No per-member charges, no setup costs. Cancel anytime.
+        </p>
 
         {/* Cycle toggle */}
-        <div className="flex flex-wrap gap-2 mb-12 md:mb-16">
+        <div className="inline-flex flex-wrap gap-1 p-1 glass rounded-xl mb-12 md:mb-14">
           {CYCLES.map(c => (
             <button key={c.key} type="button" onClick={() => setCycle(c.key)}
-              className={`relative px-5 py-2.5 font-mono text-[11px] font-bold uppercase transition-all ${
-                cycle === c.key
-                  ? 'bg-brand-orange text-black'
-                  : 'border border-white/20 text-white/50 hover:border-white/50 hover:text-white'
+              className={`relative px-5 py-2.5 rounded-lg font-mono text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                cycle === c.key ? 'bg-heat text-black' : 'text-ash hover:text-bone'
               }`}
             >
               {c.label}
-              {c.discount && <span className="ml-1.5 opacity-60 text-[9px]">{c.discount}</span>}
-              {c.tag && (
-                <span className="absolute -top-px -right-px -translate-y-full bg-black border border-brand-orange text-brand-orange font-mono text-[8px] uppercase px-1.5 py-0.5 font-bold">
-                  {c.tag}
-                </span>
-              )}
+              {c.discount && <span className="ml-1.5 opacity-70 text-[9px]">{c.discount}</span>}
+              {c.tag && cycle !== c.key && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-flame" />}
             </button>
           ))}
         </div>
 
         {upgradeSuccess && (
-          <div role="alert" className="mb-12 border-2 border-brand-orange bg-brand-orange/10 p-6 text-center">
-            <Check className="w-8 h-8 text-brand-orange mx-auto mb-2" strokeWidth={3} />
-            <p className="font-archivo text-2xl text-brand-orange uppercase">
-              UPGRADED TO {upgradeSuccess.replace(/_/g, ' ').toUpperCase()}!
+          <div role="alert" className="mb-12 glass glass-heat top-sheen rounded-2xl p-6 text-center">
+            <Check className="w-8 h-8 text-flame mx-auto mb-2" strokeWidth={3} />
+            <p className="font-display text-2xl text-heat uppercase">
+              Upgraded to {upgradeSuccess.replace(/_/g, ' ')}!
             </p>
-            <p className="font-mono text-xs text-white/60 uppercase mt-2 font-bold">
+            <p className="font-mono text-xs text-ash mt-2">
               Your subscription is now active. Open the GymSetu app to start using new features.
             </p>
           </div>
         )}
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 md:gap-6">
           {PLANS.map(plan => {
             const amount   = PRICING[plan.id][cycle];
             const savings  = SAVINGS[plan.id][cycle];
@@ -196,34 +198,27 @@ export const Pricing = () => {
 
             return (
               <div key={plan.id}
-                className={`relative border-2 p-6 md:p-8 flex flex-col ${
-                  isCurrent
-                    ? 'border-brand-orange ring-1 ring-brand-orange/20'
-                    : plan.highlight
-                      ? 'border-brand-orange/50'
-                      : 'border-white/20'
+                className={`relative glass rounded-2xl p-6 md:p-7 flex flex-col ${
+                  isCurrent ? 'ring-1 ring-flame/40 glass-heat' : plan.highlight ? 'glass-heat top-sheen' : ''
                 }`}
               >
-                {isCurrent && (
-                  <div className="absolute top-0 left-0 bg-brand-orange text-black px-3 py-1 font-mono text-[9px] font-bold uppercase -translate-y-1/2 translate-x-2">
-                    CURRENT PLAN
+                {isCurrent ? (
+                  <div className="absolute top-0 left-6 -translate-y-1/2 bg-heat text-black px-3 py-1 rounded-full font-mono text-[9px] font-bold uppercase tracking-wider">
+                    Current plan
                   </div>
-                )}
-                {plan.highlight && !isCurrent && (
-                  <div className="absolute top-0 right-0 bg-brand-orange/20 border border-brand-orange text-brand-orange px-3 py-1 font-mono text-[9px] font-bold uppercase -translate-y-1/2 translate-x-1">
-                    RECOMMENDED
+                ) : plan.highlight && (
+                  <div className="absolute top-0 right-6 -translate-y-1/2 bg-heat text-black px-3 py-1 rounded-full font-mono text-[9px] font-bold uppercase tracking-wider">
+                    Recommended
                   </div>
                 )}
 
-                <h2 className={`font-archivo text-3xl md:text-4xl mb-0.5 ${isCurrent || plan.highlight ? 'text-brand-orange' : 'text-white'}`}>
-                  {plan.label.toUpperCase()}
+                <h2 className={`font-display text-3xl md:text-4xl uppercase mb-0.5 ${isCurrent || plan.highlight ? 'text-heat' : 'text-bone'}`}>
+                  {plan.label}
                 </h2>
-                <p className="font-mono text-[10px] text-white/30 uppercase font-bold mb-3">{plan.members}</p>
+                <p className="font-mono text-[10px] text-ash uppercase tracking-wider mb-3">{plan.members}</p>
 
-                <div className={`inline-flex items-center gap-1.5 self-start px-2.5 py-1 mb-4 font-mono text-[9px] font-bold uppercase ${
-                  plan.id === 'basic'
-                    ? 'border border-white/10 text-white/20'
-                    : 'border border-brand-orange/40 bg-brand-orange/10 text-brand-orange'
+                <div className={`inline-flex items-center gap-1.5 self-start px-2.5 py-1 mb-4 rounded font-mono text-[9px] font-bold uppercase ${
+                  plan.id === 'basic' ? 'border border-hairline text-ash' : 'border border-flame/40 bg-flame/10 text-flame'
                 }`}>
                   <MessageSquare className="w-3 h-3" />
                   {plan.id === 'basic' ? 'No WhatsApp' : `${PLAN_TOKENS[plan.id].toLocaleString('en-IN')} tokens/mo`}
@@ -231,38 +226,34 @@ export const Pricing = () => {
 
                 <div className="mb-2">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-archivo text-4xl md:text-5xl text-white">
-                      ₹{amount.toLocaleString('en-IN')}
-                    </span>
-                    <span className="font-mono text-[10px] font-bold text-white/40 uppercase">
+                    <span className="font-display text-4xl md:text-5xl text-bone">₹{amount.toLocaleString('en-IN')}</span>
+                    <span className="font-mono text-[10px] font-bold text-ash uppercase">
                       /{CYCLES.find(c => c.key === cycle)?.label}
                     </span>
                   </div>
                   {cycle !== 'monthly' && (
-                    <p className="font-mono text-[10px] font-bold text-white/30 mt-0.5">
-                      ₹{perMonth.toLocaleString('en-IN')}/mo equivalent
-                    </p>
+                    <p className="font-mono text-[10px] font-bold text-ash mt-0.5">₹{perMonth.toLocaleString('en-IN')}/mo equivalent</p>
                   )}
-                  <p className="font-mono text-[9px] font-bold text-white/20 mt-0.5">+18% GST applicable</p>
+                  <p className="font-mono text-[9px] font-bold text-ash/60 mt-0.5">+18% GST applicable</p>
                 </div>
 
                 {savings > 0 ? (
-                  <div className="inline-flex items-center self-start px-2.5 py-1 mb-6 bg-brand-orange/10 border border-brand-orange/30 text-brand-orange font-mono text-[9px] font-bold uppercase">
-                    SAVE ₹{savings.toLocaleString('en-IN')}
+                  <div className="inline-flex items-center self-start px-2.5 py-1 mb-6 bg-flame/10 border border-flame/30 text-flame font-mono text-[9px] font-bold uppercase rounded">
+                    Save ₹{savings.toLocaleString('en-IN')}
                   </div>
                 ) : <div className="mb-6" />}
 
-                <ul className="flex flex-col gap-3 mb-8 flex-grow">
+                <ul className="flex flex-col gap-2.5 mb-8 flex-grow">
                   {plan.features.map((f, i) => (
                     <li key={i} className="flex items-start gap-2.5">
-                      <Check className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-brand-orange" strokeWidth={3} />
-                      <span className="font-mono text-[10px] font-bold uppercase text-white/70">{f}</span>
+                      <Check className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-flame" strokeWidth={3} />
+                      <span className="font-sans text-xs text-bone/75">{f}</span>
                     </li>
                   ))}
                   {plan.missing.map((f, i) => (
-                    <li key={`x-${i}`} className="flex items-start gap-2.5 opacity-25">
-                      <X className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" strokeWidth={3} />
-                      <span className="font-mono text-[10px] font-bold uppercase">{f}</span>
+                    <li key={`x-${i}`} className="flex items-start gap-2.5 opacity-40">
+                      <X className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-ash" strokeWidth={3} />
+                      <span className="font-sans text-xs text-ash line-through">{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -270,34 +261,26 @@ export const Pricing = () => {
                 {/* CTA — auth vs non-auth */}
                 {isReady && session && gymId ? (
                   isCurrent ? (
-                    <div className="w-full py-4 font-archivo text-lg uppercase tracking-tighter text-center border-2 border-brand-orange/30 text-brand-orange/60 cursor-default">
-                      CURRENT PLAN
+                    <div className="w-full py-3.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider text-center border border-flame/30 text-flame/70 cursor-default">
+                      Current plan
                     </div>
                   ) : (
                     <button
-                      onClick={() => {
-                        trackEvent('cta_click', { plan: plan.id, cycle, page: 'pricing' });
-                        handleUpgrade(plan.id);
-                      }}
+                      onClick={() => { trackEvent('cta_click', { plan: plan.id, cycle, page: 'pricing' }); handleUpgrade(plan.id); }}
                       disabled={purchasing}
-                      className="w-full py-4 font-archivo text-lg uppercase tracking-tighter transition-opacity hover:opacity-90 disabled:opacity-50 bg-brand-orange text-black"
+                      className="w-full py-3.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider transition-opacity hover:opacity-90 disabled:opacity-50 bg-heat text-black"
                     >
-                      {purchasing ? 'PROCESSING...' : `SWITCH TO ${plan.label.toUpperCase()} →`}
+                      {purchasing ? 'Processing…' : `Switch to ${plan.label} →`}
                     </button>
                   )
                 ) : (
                   <button
-                    onClick={() => {
-                      trackEvent('cta_click', { plan: plan.id, cycle, page: 'pricing' });
-                      setActiveModal(plan.id);
-                    }}
-                    className={`w-full py-4 font-archivo text-lg uppercase tracking-tighter transition-opacity hover:opacity-90 ${
-                      plan.highlight
-                        ? 'bg-brand-orange text-black'
-                        : 'bg-white/10 text-white border border-white/20 hover:border-white/40'
+                    onClick={() => { trackEvent('cta_click', { plan: plan.id, cycle, page: 'pricing' }); setActiveModal(plan.id); }}
+                    className={`w-full py-3.5 rounded-lg font-mono text-xs uppercase font-bold tracking-wider transition-opacity hover:opacity-90 ${
+                      plan.highlight ? 'bg-heat text-black' : 'bg-surface text-bone border border-hairline hover:border-flame/50'
                     }`}
                   >
-                    {plan.id === 'pro' ? 'START FREE TRIAL' : 'GET STARTED'}
+                    {plan.id === 'pro' ? 'Start free trial' : 'Get started'}
                   </button>
                 )}
               </div>
@@ -306,16 +289,16 @@ export const Pricing = () => {
         </div>
 
         {/* Branch add-on callout */}
-        <div className="mt-16 md:mt-20 border-2 border-white/10 p-8 md:p-10 flex flex-col md:flex-row md:items-center gap-6">
+        <div className="mt-16 md:mt-20 glass rounded-2xl p-8 md:p-10 flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <GitBranch className="w-5 h-5 text-brand-orange" />
-              <span className="font-mono text-[10px] font-bold text-brand-orange uppercase tracking-widest">Branch Add-On</span>
+              <GitBranch className="w-5 h-5 text-flame" />
+              <span className="font-mono text-[10px] font-bold text-flame uppercase tracking-widest">Branch add-on</span>
             </div>
-            <h3 className="font-archivo text-2xl md:text-3xl text-white uppercase tracking-tighter mb-2">
-              MANAGE MULTIPLE LOCATIONS
+            <h3 className="font-display text-2xl md:text-3xl text-bone uppercase mb-2">
+              Manage multiple locations
             </h3>
-            <p className="font-sans text-white/40 text-sm">
+            <p className="font-sans text-ash text-sm">
               Add branches to any Pro plan. Each gets its own members, trainers, payments, attendance, and WhatsApp pool.
             </p>
           </div>
@@ -325,45 +308,45 @@ export const Pricing = () => {
               { label: '2 Branches', price: '₹1,499/mo' },
               { label: '3 Branches', price: '₹2,099/mo' },
             ].map(b => (
-              <div key={b.label} className="border border-white/20 px-5 py-4 text-center min-w-[110px]">
-                <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-1">{b.label}</p>
-                <p className="font-archivo text-xl text-white">{b.price}</p>
+              <div key={b.label} className="border border-hairline rounded-xl px-5 py-4 text-center min-w-[110px]">
+                <p className="font-mono text-[10px] text-ash uppercase font-bold mb-1">{b.label}</p>
+                <p className="font-display text-xl text-bone">{b.price}</p>
               </div>
             ))}
           </div>
-          <a href="/branches" className="font-mono text-[10px] font-bold text-brand-orange uppercase hover:underline whitespace-nowrap">
-            ADD BRANCHES →
+          <a href="/branches" className="font-mono text-[10px] font-bold text-flame uppercase hover:underline whitespace-nowrap">
+            Add branches →
           </a>
         </div>
 
         {/* Token packs callout */}
-        <div className="mt-10 border-2 border-white/10 p-8 md:p-10">
+        <div className="mt-8 glass rounded-2xl p-8 md:p-10">
           <div className="flex items-center gap-2 mb-4">
-            <MessageSquare className="w-5 h-5 text-brand-orange" />
-            <span className="font-mono text-[10px] font-bold text-brand-orange uppercase tracking-widest">WhatsApp Top-Up Packs</span>
+            <MessageSquare className="w-5 h-5 text-flame" />
+            <span className="font-mono text-[10px] font-bold text-flame uppercase tracking-widest">WhatsApp top-up packs</span>
           </div>
-          <p className="font-sans text-white/40 text-sm mb-8">
+          <p className="font-sans text-ash text-sm mb-8">
             Run out of tokens mid-month? Top up instantly — added to your current month's pool right away.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {TOKEN_PACKS.map(pack => (
-              <div key={pack.name} className="border border-white/20 p-6 text-center hover:border-brand-orange transition-colors">
-                <div className="font-mono text-[10px] text-brand-orange mb-2 font-bold">{pack.name}</div>
-                <div className="font-archivo text-2xl text-white mb-1">{pack.tokens.toLocaleString('en-IN')} tokens</div>
-                <div className="font-archivo text-2xl text-brand-orange">₹{pack.price}</div>
-                <p className="font-mono text-[9px] text-white/20 mt-1">+18% GST applicable</p>
+              <div key={pack.name} className="border border-hairline rounded-xl p-6 text-center hover:border-flame/50 transition-colors">
+                <div className="font-mono text-[10px] text-flame mb-2 font-bold uppercase tracking-wider">{pack.name}</div>
+                <div className="font-display text-2xl text-bone mb-1">{pack.tokens.toLocaleString('en-IN')} tokens</div>
+                <div className="font-display text-2xl text-heat">₹{pack.price}</div>
+                <p className="font-mono text-[9px] text-ash/60 mt-1">+18% GST applicable</p>
               </div>
             ))}
           </div>
           <div className="mt-6 text-center">
-            <a href="/tokens" className="font-mono text-[10px] font-bold text-brand-orange uppercase hover:underline">
-              BUY TOKEN PACK →
+            <a href="/tokens" className="font-mono text-[10px] font-bold text-flame uppercase hover:underline">
+              Buy token pack →
             </a>
           </div>
         </div>
 
-        <p className="mt-12 text-center font-mono text-[10px] md:text-sm text-white/40 uppercase font-bold">
-          NOT HAPPY IN YOUR FIRST 7 DAYS? WE'LL REFUND YOU. NO QUESTIONS.
+        <p className="mt-12 text-center font-mono text-[10px] md:text-xs text-ash uppercase font-bold tracking-wider">
+          Not happy in your first 7 days? We'll refund you. No questions.
         </p>
       </div>
 

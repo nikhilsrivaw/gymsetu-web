@@ -4,6 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { OAuthButtons } from '../components/OAuthButtons';
+import { AuthShell, authInput, authLabel } from '../components/AuthShell';
 import { landingPath } from '../lib/admin';
 
 export const Login = () => {
@@ -43,82 +44,63 @@ export const Login = () => {
   };
 
   return (
-    <main className="bg-near-black min-h-screen flex items-center justify-center px-4 pt-24 pb-16">
-      <div className="w-full max-w-sm">
-        <h1 className="font-archivo text-5xl md:text-6xl text-white uppercase mb-2 leading-none tracking-tighter">
-          WELCOME<br /><span className="text-brand-orange">BACK.</span>
+    <AuthShell>
+      <div className="text-center mb-8">
+        <p className="font-mono text-[10px] text-ash uppercase tracking-[0.2em] mb-3">Gym owner portal</p>
+        <h1 className="font-display text-5xl md:text-6xl text-bone uppercase leading-[0.9]">
+          Welcome <span className="text-heat">back</span>
         </h1>
-        <p className="font-mono text-[10px] text-white/40 uppercase font-bold mb-8">GYM OWNER PORTAL</p>
+      </div>
 
+      <div className="glass rounded-2xl p-7 md:p-8">
         <OAuthButtons />
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="font-mono text-[10px] text-white/30 uppercase font-bold">OR CONTINUE WITH EMAIL</span>
-          <div className="flex-1 h-px bg-white/10" />
+          <div className="flex-1 h-px bg-hairline" />
+          <span className="font-mono text-[9px] text-ash uppercase tracking-wider">or with email</span>
+          <div className="flex-1 h-px bg-hairline" />
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
           <div>
-            <label htmlFor="login_email" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-              Email Address
-            </label>
+            <label htmlFor="login_email" className={authLabel}>Email address</label>
             <input
-              id="login_email"
-              type="email"
-              required
-              autoComplete="email"
+              id="login_email" type="email" required autoComplete="email"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              placeholder="rajesh@ironbeast.in"
-              className="w-full bg-black border border-white/10 text-white px-4 py-3 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+              placeholder="rajesh@ironbeast.in" className={authInput}
             />
           </div>
 
           <div>
-            <label htmlFor="login_password" className="font-mono text-[10px] uppercase font-bold text-white/40 block mb-1">
-              Password
-            </label>
+            <label htmlFor="login_password" className={authLabel}>Password</label>
             <div className="relative">
               <input
-                id="login_password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                autoComplete="current-password"
-                value={form.password}
+                id="login_password" type={showPassword ? 'text' : 'password'} required
+                autoComplete="current-password" value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                placeholder="Your password"
-                className="w-full bg-black border border-white/10 text-white px-4 py-3 pr-12 font-sans text-sm focus:outline-none focus:border-brand-orange transition-colors"
+                placeholder="Your password" className={`${authInput} pr-12`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(s => !s)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
+              <button type="button" onClick={() => setShowPassword(s => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-bone transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}>
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {error && (
-            <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">{error}</p>
-          )}
+          {error && <p role="alert" className="font-mono text-[10px] text-red-400 uppercase font-bold">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-brand-orange text-black py-4 font-archivo text-xl uppercase tracking-tighter hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading ? 'LOGGING IN...' : 'LOG IN →'}
+          <button type="submit" disabled={loading}
+            className="w-full bg-heat text-black py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50 mt-1">
+            {loading ? 'Logging in…' : 'Log in →'}
           </button>
-
-          <p className="text-center font-mono text-[10px] text-white/30 uppercase font-bold">
-            DON'T HAVE AN ACCOUNT?{' '}
-            <Link to="/signup" className="text-brand-orange hover:underline">SIGN UP FREE →</Link>
-          </p>
         </form>
       </div>
-    </main>
+
+      <p className="text-center font-mono text-[10px] text-ash uppercase tracking-wider mt-6">
+        No account? <Link to="/signup" className="text-flame hover:underline">Sign up free →</Link>
+      </p>
+    </AuthShell>
   );
 };
