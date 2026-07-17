@@ -2,17 +2,22 @@
 export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.gymsetu.app';
 export const APP_STORE_URL = 'https://apps.apple.com/app/gymsetu/id000000000';
 
-export const SUPPORT_EMAIL = 'support@gymsetu.com';
+export const SUPPORT_EMAIL = 'gymsetu@aqirox.com';
 
 // ── Legal identity, used by /privacy, /terms and /refund ────────────────────
-// ⚠️ MUST BE FILLED IN BEFORE THOSE PAGES ARE PUBLISHED. They are placeholders,
-// not defaults — they render verbatim on public pages, and PayU/Razorpay
-// onboarding checks that a real entity and address are stated. Claude did not
-// invent these because a wrong legal entity on a published policy is worse than
-// an obviously missing one.
-export const LEGAL_ENTITY = '[TODO: registered entity name, e.g. "Acme Fitness Technologies Pvt Ltd"]';
-export const LEGAL_ADDRESS = '[TODO: registered address, incl. city, state and PIN]';
-export const LEGAL_JURISDICTION = '[TODO: city for jurisdiction, e.g. "Lucknow, Uttar Pradesh"]';
+// GymSetu is a product of Aqirox Technology Private Limited (aqirox.com).
+export const LEGAL_ENTITY = 'Aqirox Technology Private Limited';
+export const PARENT_NAME = 'Aqirox Technology';
+export const PARENT_URL = 'https://aqirox.com';
+
+// Registered office. Keep this matching the Certificate of Incorporation /
+// MCA record — it's the address where legal notice is served, and PayU checks
+// the entity + address on the site against the merchant account.
+export const LEGAL_ADDRESS =
+  'Shivje Nagar, Muhisudharpur, Shivpuri New Colony, Gorakhpur Sadar, Gorakhpur, Uttar Pradesh 273016, India';
+
+// Follows the registered office, which is the normal default.
+export const LEGAL_JURISDICTION = 'Gorakhpur, Uttar Pradesh';
 
 // Bump when the policies change materially; it's the date shown to users.
 export const LEGAL_UPDATED = '17 July 2026';

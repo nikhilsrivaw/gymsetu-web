@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { WaitlistForm } from './WaitlistForm';
+import { PARENT_NAME, PARENT_URL } from '../lib/constants';
 
 export const Footer = () => {
   const [showWaitlist, setShowWaitlist] = useState(false);
@@ -28,7 +29,20 @@ export const Footer = () => {
 
           {/* bottom bar */}
           <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-6 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-            <span>© {new Date().getFullYear()} GymSetu · Built for Indian gyms</span>
+            {/* Parent-company credit. target=_blank so a click never navigates
+                anyone away from gymsetu.it.com — it opens alongside. */}
+            <span className="text-center md:text-left">
+              © {new Date().getFullYear()} GymSetu · A product by{' '}
+              <a
+                href={PARENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-bone/70 hover:text-flame transition-colors"
+              >
+                {PARENT_NAME}
+              </a>
+              {' · '}Built for Indian gyms
+            </span>
             {/* Payment gateways check that terms/privacy/refund are reachable
                 from the site, and a footer is where reviewers look first. */}
             <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-8 gap-y-3">

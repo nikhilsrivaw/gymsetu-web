@@ -88,7 +88,19 @@ export const Terms = () => (
       </p>
     </LegalSection>
 
-    <LegalSection title="9. Your data belongs to you">
+    <LegalSection title="9. Ownership of the software">
+      <p>
+        GymSetu is owned and operated by {LEGAL_ENTITY}. The software, its name, logo and design are
+        our intellectual property and all rights are reserved. Your subscription buys the right to use
+        GymSetu to run your gym — it does not transfer ownership of any part of it.
+      </p>
+      <p>
+        You may not copy, resell, reverse-engineer or white-label GymSetu without a written agreement
+        with us.
+      </p>
+    </LegalSection>
+
+    <LegalSection title="10. Your data belongs to you">
       <p>
         You own your gym’s data. We claim no ownership of it and will not sell it. We use it only to
         run the service for you, as described in the{' '}
@@ -97,7 +109,7 @@ export const Terms = () => (
       <p>You can ask us for an export of your data at any time while your account is active, and we will provide it in a common format.</p>
     </LegalSection>
 
-    <LegalSection title="10. Ending it">
+    <LegalSection title="11. Ending it">
       <p>You can cancel at any time — see the <Link className="text-flame hover:underline" to="/refund">Refund Policy</Link>.</p>
       <p>
         We may suspend or end an account that breaches these terms, or where fees are unpaid. Except in
@@ -106,7 +118,7 @@ export const Terms = () => (
       </p>
     </LegalSection>
 
-    <LegalSection title="11. Liability">
+    <LegalSection title="12. Liability">
       <p>
         GymSetu is provided “as is”. To the extent the law allows, our total liability to you for any
         claim is limited to the fees you paid us in the 12 months before it arose.
@@ -117,11 +129,11 @@ export const Terms = () => (
       </p>
     </LegalSection>
 
-    <LegalSection title="12. Governing law">
+    <LegalSection title="13. Governing law">
       <p>These terms are governed by the laws of India. The courts at {LEGAL_JURISDICTION} have exclusive jurisdiction.</p>
     </LegalSection>
 
-    <LegalSection title="13. Changes">
+    <LegalSection title="14. Changes">
       <p>
         We may update these terms. If a change materially affects you, we will email you at least 30
         days beforehand. Continuing to use GymSetu after that means you accept the new terms.
