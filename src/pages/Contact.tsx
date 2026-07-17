@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { MessageSquare, Mail, Clock, ArrowRight } from 'lucide-react';
+import { MessageSquare, Mail, Clock, ArrowRight, Users } from 'lucide-react';
 import { ContactForm } from '../components/ContactForm';
-import { SUPPORT_EMAIL } from '../lib/constants';
+import { SUPPORT_EMAIL, WHATSAPP_NUMBER, WHATSAPP_COMMUNITY_URL } from '../lib/constants';
 import { trackEvent } from '../lib/analytics';
 
-const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210';
+const waNumber = WHATSAPP_NUMBER;
 
 export const Contact = () => {
   useEffect(() => {
@@ -36,6 +36,23 @@ export const Contact = () => {
                 className="bg-black text-bone px-6 py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider flex items-center gap-3 hover:gap-5 transition-all w-fit"
               >
                 Chat now <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </a>
+            </div>
+
+            <div className="glass rounded-2xl p-8 md:p-10">
+              <Users className="w-10 h-10 md:w-12 md:h-12 mb-6 text-flame" aria-hidden="true" />
+              <h2 className="font-display text-3xl md:text-4xl mb-3 uppercase text-bone">Gym owners’ community</h2>
+              <p className="font-sans text-base text-ash mb-8">
+                Join other Indian gym owners on WhatsApp — ask questions, compare notes, and hear
+                about new GymSetu features first.
+              </p>
+              <a
+                href={WHATSAPP_COMMUNITY_URL}
+                target="_blank" rel="noopener noreferrer"
+                onClick={() => trackEvent('community_click', { source: 'contact_page' })}
+                className="border border-flame/40 text-flame px-6 py-3.5 rounded-lg font-mono text-sm uppercase font-bold tracking-wider flex items-center gap-3 hover:gap-5 hover:bg-flame hover:text-black transition-all w-fit"
+              >
+                Join the group <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </a>
             </div>
 
@@ -81,7 +98,7 @@ export const Contact = () => {
             {[
               { q: 'Do I need to be tech-savvy to use GymSetu?',       a: 'If you can use WhatsApp, you can use GymSetu. Setup takes under 10 minutes.' },
               { q: 'What happens after the 7-day free trial?',          a: 'You\'re automatically moved to the Pro plan at ₹1,699/month. You can cancel anytime before the trial ends.' },
-              { q: 'Is my data safe?',                                  a: 'Yes. All data is encrypted and stored on secure servers. We never share your data.' },
+              { q: 'Is my data safe?',                                  a: 'Your data is stored in India (Mumbai), sent over encrypted connections, and backed up nightly. Each gym is isolated — no other gym can see your members. We never sell your data, and the only companies we share it with are the ones needed to run the service: PayU for payments, Meta for WhatsApp reminders, and our AI provider when you use an AI feature. It’s all listed in our Privacy Policy.' },
             ].map((faq, i) => (
               <div key={i} className="border-b border-hairline pb-6 md:pb-8">
                 <h4 className="font-display text-xl md:text-2xl text-bone uppercase mb-3">{faq.q}</h4>

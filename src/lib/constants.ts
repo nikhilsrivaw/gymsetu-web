@@ -4,6 +4,21 @@ export const APP_STORE_URL = 'https://apps.apple.com/app/gymsetu/id000000000';
 
 export const SUPPORT_EMAIL = 'gymsetu@aqirox.com';
 
+// ── Contact channels ────────────────────────────────────────────────────────
+// One source of truth. Previously App.tsx and Contact.tsx each did
+// `import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210'` — and that fallback
+// is a PLACEHOLDER number, not ours. If the env var is ever missing from the
+// Vercel project (it isn't in git; .env is local only), every "chat now" button
+// would have quietly pointed a real customer at a stranger's WhatsApp. The
+// fallback is now the real number, so a missing env var degrades to correct
+// rather than to wrong.
+export const WHATSAPP_NUMBER: string =
+  import.meta.env.VITE_WHATSAPP_NUMBER || '917905537549';
+
+// Public GymSetu community group. Invite links are permanent until revoked;
+// the ?s=&p=&ilr= params are just share-sheet tracking and are stripped.
+export const WHATSAPP_COMMUNITY_URL = 'https://chat.whatsapp.com/GyAvM0pNI8IDKaUjOEvs4Z';
+
 // ── Legal identity, used by /privacy, /terms and /refund ────────────────────
 // GymSetu is a product of Aqirox Technology Private Limited (aqirox.com).
 export const LEGAL_ENTITY = 'Aqirox Technology Private Limited';

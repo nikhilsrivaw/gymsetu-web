@@ -27,6 +27,7 @@ import { Tokens } from './pages/Tokens';
 import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentFailure } from './pages/PaymentFailure';
 import { trackEvent } from './lib/analytics';
+import { WHATSAPP_NUMBER } from './lib/constants';
 
 // Franchise portal
 import { FranchiseLayout } from './franchise/components/FranchiseLayout';
@@ -49,7 +50,7 @@ declare global {
   }
 }
 
-const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919876543210';
+const waNumber = WHATSAPP_NUMBER;
 const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // Pages without marketing footer / WhatsApp widget
