@@ -16,20 +16,12 @@ const CYCLE_MONTHS: Record<BillingCycle, number> = {
 
 const PLANS: { id: PlanId; label: string; members: string; tokens: string; highlight: boolean; features: string[] }[] = [
   {
-    id: 'basic',
-    label: 'Basic',
-    members: 'Any members',
-    tokens: 'No WhatsApp',
-    highlight: false,
-    features: ['Member management', 'Attendance & payments', 'Reports & analytics', 'Trainer management'],
-  },
-  {
     id: 'pro',
     label: 'Pro',
     members: 'Up to 200 members',
     tokens: '500 tokens/mo',
     highlight: true,
-    features: ['Everything in Basic', '500 WhatsApp tokens/mo', 'AI features', 'Branch add-on available', '7-day free trial'],
+    features: ['Member, attendance & payments', 'GST invoices & reports', 'WhatsApp automation (500/mo)', 'AI Insights, Forecast & Churn', 'AI diet & workout plans', 'Trainer management', '7-day free trial'],
   },
   {
     id: 'pro_plus',

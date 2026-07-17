@@ -31,19 +31,11 @@ const PLANS: {
   missing: string[];
 }[] = [
   {
-    id: 'basic',
-    label: 'Basic',
-    members: 'Any members',
-    highlight: false,
-    features: ['Member management', 'Attendance & payments', 'Reports & analytics', 'Trainer management'],
-    missing: ['WhatsApp automation', 'AI features', 'Branch management'],
-  },
-  {
     id: 'pro',
     label: 'Pro',
     members: 'Up to 200 members',
     highlight: true,
-    features: ['Everything in Basic', '500 WhatsApp tokens/mo', 'AI Insights & Reports', 'Revenue Forecast', 'Churn Early Warning', 'AI Diet & Workout Plans', 'Branch add-on available', '7-day free trial'],
+    features: ['Member, attendance & payments', 'GST invoices & reports', '500 WhatsApp tokens/mo', 'AI Insights & Reports', 'Revenue Forecast', 'Churn Early Warning', 'AI Diet & Workout Plans', 'Trainer management', 'Branch add-on available', '7-day free trial'],
     missing: [],
   },
   {

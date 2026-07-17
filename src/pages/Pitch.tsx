@@ -9,16 +9,13 @@ import {
 /*
  * /pitch — Hinglish sales deck for field marketers.
  *
- * Grounded in the LIVE pricing page (src/pages/Pricing.tsx), not invented:
- *   Basic ₹999  → member mgmt, attendance, payments, basic reports, trainers.
- *                 NO WhatsApp automation, NO AI.
- *   Pro   ₹1,699→ everything in Basic + WhatsApp automation + AI Insights &
- *                 Reports + Revenue Forecast + Churn Early Warning + AI diet/
- *                 workout + 7-day trial.  <-- "Pro mein saare reports aur AI"
- *   Pro Plus/Max→ more members, more branches, more WhatsApp/AI tokens.
- *
- * Every feature carries a tier badge so the marketer can say "yeh Basic mein,
- * yeh Pro mein" without guessing. Sectioned Core → Pro Power → recap → pricing.
+ * Basic plan REMOVED. Pro (₹1,699) is now the entry plan, and every plan
+ * (Pro / Pro Plus / Pro Max) includes ALL features — they differ only by gym
+ * size (members / branches / WhatsApp+AI tokens). So the deck's message is
+ * "saare features har plan mein — plan sirf gym ke size se". Each feature shows
+ * a "Har plan mein" badge (multi-branch shows "Add-on"). Grounded in the live
+ * pricing page (src/pages/Pricing.tsx). Sectioned: daily tools → smart features
+ * → "sab included" recap → pricing.
  */
 
 type Tier = 'basic' | 'pro' | 'proplus';
@@ -41,7 +38,7 @@ const CORE: FeatureData[] = [
     kyun: 'Jo member gayab ho raha hai, app warning deta hai. Chhodne se pehle pata chal jaata hai — time pe call, member wapas.',
   },
   {
-    icon: BarChart3, tag: 'Basic Reports', tier: 'basic', title: 'Business Ke Number Saamne',
+    icon: BarChart3, tag: 'Reports', tier: 'basic', title: 'Business Ke Number Saamne',
     kya: 'Revenue report, member report, attendance trend, aur expiry list — kaun kis din expire ho raha hai. Har plan mein.',
     kyun: 'Guess nahi, data pe decision. Kitni kamai hui, kitne naye aaye, kab bheed hoti hai — business samajh aata hai.',
   },
@@ -103,10 +100,8 @@ const TRUST: FeatureData = {
 };
 
 const PLANS = [
-  { name: 'BASIC', price: '999', who: 'Har size ka gym — shuruaat ke liye',
-    has: ['Member management', 'Attendance & payments', 'Basic reports', 'Trainer management'], popular: false },
   { name: 'PRO', price: '1,699', who: '≤200 members · sabse popular',
-    has: ['Sab kuch Basic ka', 'WhatsApp automation', 'AI Insights & Reports', 'Revenue Forecast', 'Churn warning', '7-din free trial'], popular: true },
+    has: ['Members, attendance & payments', 'GST invoices & reports', 'WhatsApp automation', 'AI Insights, Forecast & Churn', 'AI diet & workout', '7-din free trial'], popular: true },
   { name: 'PRO PLUS', price: '2,199', who: '200–500 members',
     has: ['Sab kuch Pro ka', '1,000 WhatsApp tokens', 'Branch add-on'], popular: false },
   { name: 'PRO MAX', price: '2,999', who: '500+ members',
@@ -131,7 +126,7 @@ const SLIDES: Slide[] = [
   { kind: 'problem' },
   { kind: 'divider', sec: 'Section 1', title: 'Core Features', sub: 'Jo har plan mein milte hain', icon: Layers },
   ...CORE.map(F),
-  { kind: 'divider', sec: 'Section 2', title: 'Pro Power', sub: 'Jo aapka gym aage badhaate hain', icon: Rocket },
+  { kind: 'divider', sec: 'Section 2', title: 'Smart Features', sub: 'AI, reports aur automation — har plan mein', icon: Rocket },
   ...PRO.map(F),
   F(SCALE),
   F(TRUST),
@@ -139,12 +134,6 @@ const SLIDES: Slide[] = [
   { kind: 'pricing' },
   { kind: 'close' },
 ];
-
-const TIER_STYLE: Record<Tier, { label: string; cls: string }> = {
-  basic:   { label: 'BASIC',    cls: 'text-ash border-ash/40 bg-white/[0.04]' },
-  pro:     { label: 'PRO',      cls: 'text-flame border-flame/40 bg-flame/10' },
-  proplus: { label: 'PRO PLUS', cls: 'text-amber border-amber/40 bg-amber/10' },
-};
 
 const slideLabel = (s: Slide) =>
   s.kind === 'cover' ? 'Intro'
@@ -326,11 +315,6 @@ const Divider = ({ s }: { s: Extract<Slide, { kind: 'divider' }> }) => {
   );
 };
 
-const TierBadge = ({ tier }: { tier: Tier }) => {
-  const t = TIER_STYLE[tier];
-  return <span className={`font-mono text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${t.cls}`}>{t.label}</span>;
-};
-
 const Feature = ({ s, index, total }: { s: FeatureData; index: number; total: number }) => {
   const Icon = s.icon;
   return (
@@ -343,7 +327,9 @@ const Feature = ({ s, index, total }: { s: FeatureData; index: number; total: nu
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-ash">
             {String(index).padStart(2, '0')}/{String(total).padStart(2, '0')} · {s.tag}
           </p>
-          <TierBadge tier={s.tier} />
+          {s.tier === 'proplus'
+            ? <span className="font-mono text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border text-amber border-amber/40 bg-amber/10">Add-on</span>
+            : <span className="font-mono text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border text-emerald-400 border-emerald-400/40 bg-emerald-400/10">Har plan mein</span>}
         </div>
       </div>
 
@@ -369,14 +355,11 @@ const Feature = ({ s, index, total }: { s: FeatureData; index: number; total: nu
 
 const ProRecap = () => (
   <div>
-    <div className="flex items-center gap-2.5 mb-4">
-      <p className="font-mono text-[11px] uppercase tracking-[0.25em] font-bold text-flame">Sabse popular plan</p>
-      <TierBadge tier="pro" />
-    </div>
+    <p className="font-mono text-[11px] uppercase tracking-[0.25em] font-bold text-flame mb-4">Sab kuch included</p>
     <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-bone uppercase leading-[0.95] tracking-tight text-balance mb-3">
-      Pro mein <span className="text-heat">yeh sab</span> unlock hota hai
+      Har plan mein <span className="text-heat">yeh sab</span> milta hai
     </h2>
-    <p className="font-sans text-[15px] text-ash mb-6">Basic ka sab kuch — plus woh smart features jo members rok-te aur kamai badhaate hain:</p>
+    <p className="font-sans text-[15px] text-ash mb-6">Chhota gym ho ya bada — saare features same. Plan sirf aapke gym ke size se choose karo:</p>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
       {[
         ['WhatsApp automatic reminders', 'Renewals khud yaad dilata hai'],
@@ -394,8 +377,9 @@ const ProRecap = () => (
       ))}
     </div>
     <div className="mt-6 flex items-baseline gap-2">
+      <span className="font-sans text-[14px] text-ash">Shuru</span>
       <span className="font-display text-4xl text-bone">₹1,699</span>
-      <span className="font-sans text-[14px] text-ash">/month · ≤200 members</span>
+      <span className="font-sans text-[14px] text-ash">/month se · 7-din free trial</span>
     </div>
   </div>
 );
@@ -425,7 +409,7 @@ const Pricing = () => (
         </div>
       ))}
     </div>
-    <p className="font-sans text-[15px] text-ash mt-5 text-center">Quarterly/yearly lein toh 8–15% tak sasta. <b className="text-bone">Pro pe 7-din free trial.</b></p>
+    <p className="font-sans text-[15px] text-ash mt-5 text-center"><b className="text-bone">Saare features har plan mein</b> — plan sirf gym ke size se. Quarterly/yearly pe 8–15% sasta, Pro pe 7-din free trial.</p>
   </div>
 );
 
