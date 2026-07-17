@@ -54,8 +54,13 @@ const waNumber = WHATSAPP_NUMBER;
 const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 
 // Pages without marketing footer / WhatsApp widget
+// /admin is a back office, not part of the marketing site. Showing the public
+// navbar there put "Pricing · Features · Start free trial" above the internal
+// sign-in, which is both confusing for an operator and advertises the staff
+// door on the same chrome as the customer one.
+const NO_NAV_PATHS     = new Set(['/admin']);
 const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens', '/payment/success', '/payment/failure']);
-const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback', '/payment/success', '/payment/failure']);
+const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback', '/payment/success', '/payment/failure', '/admin']);
 
 // Franchise portal has its own layout — hide main Navbar/Footer entirely
 const isFranchisePath = (p: string) => p.startsWith('/franchise/') || p === '/franchise' || p.startsWith('/accept-invite/');
@@ -87,12 +92,13 @@ function PageTracker() {
 function AppShell() {
   const { pathname } = useLocation();
   const franchise = isFranchisePath(pathname);
+  const showNav    = !franchise && !NO_NAV_PATHS.has(pathname);
   const showFooter = !franchise && !NO_FOOTER_PATHS.has(pathname);
   const showWidget = !franchise && !NO_WIDGET_PATHS.has(pathname);
 
   return (
     <div className="min-h-screen flex flex-col selection:bg-black selection:text-brand-orange">
-      {!franchise && <Navbar />}
+      {showNav && <Navbar />}
       <div className="flex-grow">
         <Routes>
           {/* Main site routes */}

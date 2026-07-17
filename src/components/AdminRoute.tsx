@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useIsAdmin } from '../lib/admin';
+import { AdminLogin } from '../pages/AdminLogin';
 import { ShieldAlert, Loader2 } from 'lucide-react';
 
 export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -19,7 +20,12 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!session) return <Navigate to="/login" replace />;
+  // Render the internal sign-in IN PLACE rather than redirecting to /login.
+  // Redirecting sent operators to the gym-owner marketing portal, and it also
+  // meant /admin publicly announced where the owner login lives. Rendering in
+  // place keeps the URL at /admin, so a successful sign-in lands on the console
+  // with no return-path juggling.
+  if (!session) return <AdminLogin />;
 
   if (!isAdmin) {
     return (
