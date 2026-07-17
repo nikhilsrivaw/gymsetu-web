@@ -40,9 +40,7 @@ export const FranchiseNavbar = () => {
           to="/franchise/dashboard"
           className="p-6 border-b border-white/10 flex items-center gap-2"
         >
-          <span className="font-archivo text-xl tracking-tighter text-white">
-            GYMSETU
-          </span>
+          <img src="/gymsetu-logo.png" alt="GymSetu" className="h-7 w-auto" />
           <span className="font-mono text-[8px] font-bold text-brand-orange border border-brand-orange px-1.5 py-0.5 uppercase">
             FRANCHISE
           </span>
@@ -92,9 +90,7 @@ export const FranchiseNavbar = () => {
       {/* Mobile top bar */}
       <nav className="md:hidden fixed top-0 left-0 w-full z-50 bg-black border-b-2 border-white/10 px-4 py-3 flex items-center justify-between">
         <Link to="/franchise/dashboard" className="flex items-center gap-2">
-          <span className="font-archivo text-lg tracking-tighter text-white">
-            GYMSETU
-          </span>
+          <img src="/gymsetu-logo.png" alt="GymSetu" className="h-6 w-auto" />
           <span className="font-mono text-[7px] font-bold text-brand-orange border border-brand-orange px-1 py-0.5 uppercase">
             FRANCHISE
           </span>

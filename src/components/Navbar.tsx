@@ -37,8 +37,8 @@ export const Navbar = () => {
               : 'bg-transparent border border-transparent'
           )}
         >
-          <Link to="/" className="font-archivo text-xl md:text-2xl uppercase tracking-tight text-bone pl-2">
-            GYM<span className="text-heat">SETU</span>
+          <Link to="/" className="pl-2 flex items-center" aria-label="GymSetu — home">
+            <img src="/gymsetu-logo.png" alt="GymSetu" className="h-9 md:h-11 w-auto" />
           </Link>
 
           {/* Center links */}

@@ -13,8 +13,8 @@ export const Footer = () => {
         <div className="max-w-7xl mx-auto">
           {/* masthead sign-off */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-bone/10 pb-12">
-            <Link to="/" className="font-display uppercase leading-[0.85] tracking-tight text-bone text-6xl md:text-8xl">
-              GYM<span className="text-flame">SETU</span>
+            <Link to="/" className="inline-block" aria-label="GymSetu — home">
+              <img src="/gymsetu-logo.png" alt="GymSetu" className="h-20 md:h-28 w-auto" />
             </Link>
             <div className="flex flex-col items-start md:items-end gap-4">
               <span className="font-serif italic text-xl text-bone/70">The operating system for Indian gyms.</span>
