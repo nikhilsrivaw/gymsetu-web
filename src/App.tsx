@@ -15,6 +15,7 @@ import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Refund } from './pages/Refund';
 import { HowToInstall } from './pages/HowToInstall';
+import { Pitch } from './pages/Pitch';
 import { Signup } from './pages/Signup';
 import { SignupPlan } from './pages/SignupPlan';
 import { SignupSetup } from './pages/SignupSetup';
@@ -59,9 +60,9 @@ const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
 // navbar there put "Pricing · Features · Start free trial" above the internal
 // sign-in, which is both confusing for an operator and advertises the staff
 // door on the same chrome as the customer one.
-const NO_NAV_PATHS     = new Set(['/admin']);
-const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens', '/payment/success', '/payment/failure']);
-const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback', '/payment/success', '/payment/failure', '/admin']);
+const NO_NAV_PATHS     = new Set(['/admin', '/pitch']);
+const NO_FOOTER_PATHS  = new Set(['/signup', '/signup/plan', '/signup/setup', '/login', '/dashboard', '/admin', '/auth/callback', '/branches', '/tokens', '/payment/success', '/payment/failure', '/pitch']);
+const NO_WIDGET_PATHS  = new Set(['/dashboard', '/signup/plan', '/signup/setup', '/auth/callback', '/payment/success', '/payment/failure', '/admin', '/pitch']);
 
 // Franchise portal has its own layout — hide main Navbar/Footer entirely
 const isFranchisePath = (p: string) => p.startsWith('/franchise/') || p === '/franchise' || p.startsWith('/accept-invite/');
@@ -113,6 +114,7 @@ function AppShell() {
           <Route path="/terms"     element={<Terms />} />
           <Route path="/refund"    element={<Refund />} />
           <Route path="/how-to-install" element={<HowToInstall />} />
+          <Route path="/pitch" element={<Pitch />} />
           <Route path="/signup"        element={<Signup />} />
           <Route path="/signup/plan"   element={<SignupPlan />} />
           <Route path="/signup/setup"  element={<SignupSetup />} />
