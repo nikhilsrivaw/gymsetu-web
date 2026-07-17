@@ -1,107 +1,156 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Users, Wallet, MessageCircle, MapPin, BarChart3, Sparkles, Smartphone,
-  Dumbbell, ReceiptIndianRupee, Building2, ShieldCheck, ChevronLeft, ChevronRight,
-  X, LayoutGrid, ArrowRight, Check,
+  Users, Wallet, MapPin, Dumbbell, Smartphone, BarChart3, ReceiptIndianRupee,
+  MessageCircle, Sparkles, TrendingUp, UserMinus, Bot, Building2, ShieldCheck,
+  ChevronLeft, ChevronRight, X, LayoutGrid, ArrowRight, Check, Layers, Rocket,
 } from 'lucide-react';
 
 /*
- * /pitch — a swipeable sales deck for field marketers to walk a gym owner
- * through GymSetu, feature by feature, in Hinglish (the language the pitch
- * actually happens in). Every feature and its numbers are grounded in what the
- * product really does (FEATURES.md), not invented.
+ * /pitch — Hinglish sales deck for field marketers.
  *
- * It's a presenter tool: tap right half = next, left half = back; arrow keys,
- * swipe, and a jump-grid all work. Full-screen, no site chrome.
+ * Grounded in the LIVE pricing page (src/pages/Pricing.tsx), not invented:
+ *   Basic ₹999  → member mgmt, attendance, payments, basic reports, trainers.
+ *                 NO WhatsApp automation, NO AI.
+ *   Pro   ₹1,699→ everything in Basic + WhatsApp automation + AI Insights &
+ *                 Reports + Revenue Forecast + Churn Early Warning + AI diet/
+ *                 workout + 7-day trial.  <-- "Pro mein saare reports aur AI"
+ *   Pro Plus/Max→ more members, more branches, more WhatsApp/AI tokens.
+ *
+ * Every feature carries a tier badge so the marketer can say "yeh Basic mein,
+ * yeh Pro mein" without guessing. Sectioned Core → Pro Power → recap → pricing.
  */
 
-type FeatureData = { icon: React.ComponentType<any>; tag: string; title: string; kya: string; kyun: string };
+type Tier = 'basic' | 'pro' | 'proplus';
+type FeatureData = { icon: React.ComponentType<any>; tag: string; tier: Tier; title: string; kya: string; kyun: string };
 
+const CORE: FeatureData[] = [
+  {
+    icon: Users, tag: 'Members', tier: 'basic', title: 'Poora Member Record — Ek Jagah',
+    kya: 'Har member ka photo, phone, plan, joining date aur poori history — sab ek jagah. Naam ya number se search karo, detail turant saamne.',
+    kyun: 'Register phat-ta hai, entries kho jaati hain. Yahaan 50 ho ya 500 member — sab safe. Naya staff bhi 5 minute mein seekh jaata hai.',
+  },
+  {
+    icon: Wallet, tag: 'Payments & Dues', tier: 'basic', title: 'Ek Rupaya Bhi Miss Nahi',
+    kya: 'Cash, UPI, card, bank — har payment record. Kis member ka kitna due hai, app khud red mein dikhata hai. Partial payment bhi track.',
+    kyun: 'Ek bhi rupaya leak nahi hota. Diary mein hisaab dhoondhna khatam. Kaun defaulter hai, ek nazar mein pata.',
+  },
+  {
+    icon: MapPin, tag: 'Attendance', tier: 'basic', title: 'Kaun Aaya, Kaun Gayab',
+    kya: 'Member aaya ya nahi — GPS check-in se, ya owner/trainer haath se mark kare. Roz ka record apne aap ban-ta hai.',
+    kyun: 'Jo member gayab ho raha hai, app warning deta hai. Chhodne se pehle pata chal jaata hai — time pe call, member wapas.',
+  },
+  {
+    icon: BarChart3, tag: 'Basic Reports', tier: 'basic', title: 'Business Ke Number Saamne',
+    kya: 'Revenue report, member report, attendance trend, aur expiry list — kaun kis din expire ho raha hai. Har plan mein.',
+    kyun: 'Guess nahi, data pe decision. Kitni kamai hui, kitne naye aaye, kab bheed hoti hai — business samajh aata hai.',
+  },
+  {
+    icon: Dumbbell, tag: 'Trainers', tier: 'basic', title: 'Har Trainer Ka Apna Login',
+    kya: 'Har trainer ko apna login. Woh apne assigned members, unke plan aur progress dekhta hai — aap poora gym control karte ho.',
+    kyun: 'Kaam bat jaata hai bina control khoye. Trainer sirf apna dekhe, baaki data owner ke paas safe.',
+  },
+  {
+    icon: Smartphone, tag: 'Member App', tier: 'basic', title: 'Member Khud Sab Dekhe',
+    kya: 'Member apne phone pe apna plan, dues, diet, workout aur progress khud dekhta hai — 24 ghante.',
+    kyun: 'Aapko baar-baar batana nahi padta. Gym modern lagta hai — khush member naye members refer karta hai.',
+  },
+  {
+    icon: ReceiptIndianRupee, tag: 'GST Invoice', tier: 'basic', title: 'Professional Bill, Turant',
+    kya: 'Payment ke saath GST bill apne aap ban jaata hai — member ko WhatsApp ya print kar do.',
+    kyun: 'Gym professional dikhta hai, member ko proper receipt milti hai, aur tax ka hisaab already ready.',
+  },
+];
+
+const PRO: FeatureData[] = [
+  {
+    icon: MessageCircle, tag: 'WhatsApp Automation', tier: 'pro', title: 'Reminders — Bina Aapke Kuch Kiye',
+    kya: 'Plan expire hone se 3 din pehle member ko khud WhatsApp jaata hai. Welcome message, payment confirmation, announcement — sab automatic.',
+    kyun: 'Members bhoolte hain isliye chhodte hain. Auto-reminder = zyada renewals. Ek member ruka toh app ka poora mahina nikal gaya.',
+  },
+  {
+    icon: Sparkles, tag: 'AI Insights & Reports', tier: 'pro', title: 'AI Aapko Business Advice Deta Hai',
+    kya: 'AI aapke gym ka data padhkar batata hai — kya achha chal raha hai, kahan dhyan dena hai. Aur roz ka summary khud likhkar deta hai.',
+    kyun: 'Bina kisi analyst ke, aapko business advice milti hai. Chote decisions data pe lo, bada result milta hai.',
+  },
+  {
+    icon: TrendingUp, tag: 'Revenue Forecast', tier: 'pro', title: 'Agle 3 Mahine Ki Kamai Pehle Se',
+    kya: 'Kitne plan kab expire ho rahe hain aur purane data se — app agle 3 mahine ki kamai ka projection dikhata hai.',
+    kyun: 'Pehle se pata ki kaunsa mahina slow rahega. Us hisaab se offer aur planning — cash flow ki tension khatam.',
+  },
+  {
+    icon: UserMinus, tag: 'Churn Early Warning', tier: 'pro', title: 'Member Chhodne Se Pehle Alert',
+    kya: 'App batata hai kaun member chhodne wala hai — kam attendance + expiry paas aane pe khud alert karta hai.',
+    kyun: 'Member chup-chaap nahi jaayega. Pehle se alert, time pe ek call ya offer — retention badhta hai, kamai bachti hai.',
+  },
+  {
+    icon: Bot, tag: 'AI Diet & Workout', tier: 'pro', title: 'Diet & Workout Plan — Seconds Mein',
+    kya: 'Member ya trainer bas goal daale — AI turant personal diet aur workout plan bana deta hai.',
+    kyun: 'Bina extra nutritionist ke professional service. Member ko personal attention feel hota hai — woh gym chhodta nahi.',
+  },
+];
+
+const SCALE: FeatureData = {
+  icon: Building2, tag: 'Multi-Branch', tier: 'proplus', title: 'Ek Se Zyada Branch? Sab Ek Jagah',
+  kya: 'Har branch ke members, payments, attendance aur reports alag-alag — sab ek owner login se manage karo.',
+  kyun: 'Business bada ho raha hai toh GymSetu saath badhta hai. Poora network ek phone se control mein.',
+};
+
+const TRUST: FeatureData = {
+  icon: ShieldCheck, tag: 'Data Safety', tier: 'basic', title: 'Aapka Data, Sirf Aapka',
+  kya: 'Data India (Mumbai) ke server pe, roz backup, HTTPS secure. Har gym ka data poori tarah alag.',
+  kyun: 'Members ki detail koi doosra gym nahi dekh sakta. Server band bhi ho jaaye, backup se sab wapas.',
+};
+
+const PLANS = [
+  { name: 'BASIC', price: '999', who: 'Har size ka gym — shuruaat ke liye',
+    has: ['Member management', 'Attendance & payments', 'Basic reports', 'Trainer management'], popular: false },
+  { name: 'PRO', price: '1,699', who: '≤200 members · sabse popular',
+    has: ['Sab kuch Basic ka', 'WhatsApp automation', 'AI Insights & Reports', 'Revenue Forecast', 'Churn warning', '7-din free trial'], popular: true },
+  { name: 'PRO PLUS', price: '2,199', who: '200–500 members',
+    has: ['Sab kuch Pro ka', '1,000 WhatsApp tokens', 'Branch add-on'], popular: false },
+  { name: 'PRO MAX', price: '2,999', who: '500+ members',
+    has: ['Sab kuch Pro Plus ka', 'Advanced analytics', 'Priority support'], popular: false },
+];
+
+// ── Deck order ───────────────────────────────────────────────────────────────
 type Slide =
   | { kind: 'cover' }
   | { kind: 'problem' }
+  | { kind: 'divider'; sec: string; title: string; sub: string; icon: React.ComponentType<any> }
   | ({ kind: 'feature'; num: number; totalF: number } & FeatureData)
+  | { kind: 'prorecap' }
   | { kind: 'pricing' }
   | { kind: 'close' };
 
-const FEATURES: FeatureData[] = [
-  {
-    icon: Users, tag: 'Members', title: 'Poora Member Record — Ek Jagah',
-    kya: 'Har member ka photo, phone, plan aur history — sab aapke phone mein. Search karo, 2 second mein detail saamne.',
-    kyun: 'Register phat jaata hai, page kho jaate hain. Yahaan kuch nahi khota — 500 member ho ya 50, sab handle ho jaata hai.',
-  },
-  {
-    icon: Wallet, tag: 'Payments & Dues', title: 'Ek Rupaya Bhi Miss Nahi',
-    kya: 'Cash, UPI, card — har payment record karo. Jiska paisa baaki hai, app khud red mein dikhata hai.',
-    kyun: 'Mahine ke end mein hisaab dhoondhna band. Kiska due hai, kitna aaya — sab clear. Leakage ruk jaata hai.',
-  },
-  {
-    icon: MessageCircle, tag: 'WhatsApp Reminders', title: 'Renewal Khud Yaad Dilata Hai',
-    kya: 'Plan expire hone se 3 din pehle member ko khud WhatsApp chala jaata hai — aapko kuch karne ki zarurat nahi.',
-    kyun: 'Members bhoolte hain, isliye chhodte hain. Auto-reminder se renewal badhte hain. Ek member ruka — app ka mahina nikal gaya.',
-  },
-  {
-    icon: MapPin, tag: 'Attendance', title: 'Kaun Aaya, Kaun Gayab',
-    kya: 'GPS se ya haath se attendance mark karo. Jo member 7-10 din se nahi aaya, app bata deta hai.',
-    kyun: 'Member chupchaap chhodne se pehle warning mil jaati hai. Time pe ek call — aur woh wapas gym mein.',
-  },
-  {
-    icon: BarChart3, tag: 'Reports & Insights', title: 'Business Ke Number Saamne',
-    kya: 'Is mahine kitni kamai, kitne expire ho rahe hain, kaun chhodne wala hai, kab bheed hoti hai — ek dashboard.',
-    kyun: 'Guess pe nahi, data pe decision. Kaunsa plan chal raha hai, kahan paisa ruk raha hai — sab dikhta hai.',
-  },
-  {
-    icon: Sparkles, tag: 'AI Assistant', title: 'Diet & Workout — Seconds Mein',
-    kya: 'AI se diet plan, workout plan aur growth tips turant ban jaate hain. Bas goal daalo, plan ready.',
-    kyun: 'Bina extra trainer ke members ko professional service. Aapka gym bade gym jaisa feel deta hai.',
-  },
-  {
-    icon: Smartphone, tag: 'Member App', title: 'Member Khud Sab Dekhe',
-    kya: 'Member apne phone pe apna plan, diet, workout aur progress dekhta hai — 24x7.',
-    kyun: 'Aapko baar baar batana nahi padta. Member ko gym modern lagta hai — woh gym ka naam doston ko batata hai.',
-  },
-  {
-    icon: Dumbbell, tag: 'Trainers', title: 'Har Trainer Ka Apna Login',
-    kya: 'Trainer apne members, unke plan aur progress sambhalta hai. Aap owner — poora control aapke paas.',
-    kyun: 'Kaam bat jaata hai, par data aapka rehta hai. Trainer sirf apna dekhta hai, baaki gym safe.',
-  },
-  {
-    icon: ReceiptIndianRupee, tag: 'GST Invoice', title: 'Professional Bill, Turant',
-    kya: 'Payment ke saath GST bill apne aap ban jaata hai — member ko WhatsApp/print kar do.',
-    kyun: 'Gym professional dikhta hai, member ko proper receipt milti hai, aur tax ka hisaab ready rehta hai.',
-  },
-  {
-    icon: Building2, tag: 'Multi-Branch', title: 'Ek Se Zyada Branch?',
-    kya: 'Saari branches ek jagah se chalao — har branch ke members, payments aur reports alag-alag.',
-    kyun: 'Business bada ho raha hai toh GymSetu saath badhta hai. Ek phone se poora network aapke haath mein.',
-  },
-  {
-    icon: ShieldCheck, tag: 'Data Safety', title: 'Aapka Data, Sirf Aapka',
-    kya: 'Data India (Mumbai) ke server pe, roz backup, HTTPS secure. Har gym ka data poori tarah alag.',
-    kyun: 'Members ki detail koi doosra gym nahi dekh sakta. Server band bhi ho jaaye, backup se sab wapas.',
-  },
-];
+const ALL_FEATURES = [...CORE, ...PRO, SCALE, TRUST];
+const F = (f: FeatureData): Slide => ({ kind: 'feature', num: ALL_FEATURES.indexOf(f) + 1, totalF: ALL_FEATURES.length, ...f });
 
-const PLANS = [
-  { name: 'BASIC',    price: '999',   note: 'Kisi bhi size ka gym', popular: false },
-  { name: 'PRO',      price: '1,699', note: '≤200 members · 7-din free trial', popular: true },
-  { name: 'PRO PLUS', price: '2,199', note: '200–500 members', popular: false },
-  { name: 'PRO MAX',  price: '2,999', note: '500+ members', popular: false },
-];
-
-// Ordered deck.
 const SLIDES: Slide[] = [
   { kind: 'cover' },
   { kind: 'problem' },
-  ...FEATURES.map((f, idx) => ({ kind: 'feature' as const, num: idx + 1, totalF: FEATURES.length, ...f })),
+  { kind: 'divider', sec: 'Section 1', title: 'Core Features', sub: 'Jo har plan mein milte hain', icon: Layers },
+  ...CORE.map(F),
+  { kind: 'divider', sec: 'Section 2', title: 'Pro Power', sub: 'Jo aapka gym aage badhaate hain', icon: Rocket },
+  ...PRO.map(F),
+  F(SCALE),
+  F(TRUST),
+  { kind: 'prorecap' },
   { kind: 'pricing' },
   { kind: 'close' },
 ];
 
+const TIER_STYLE: Record<Tier, { label: string; cls: string }> = {
+  basic:   { label: 'BASIC',    cls: 'text-ash border-ash/40 bg-white/[0.04]' },
+  pro:     { label: 'PRO',      cls: 'text-flame border-flame/40 bg-flame/10' },
+  proplus: { label: 'PRO PLUS', cls: 'text-amber border-amber/40 bg-amber/10' },
+};
+
 const slideLabel = (s: Slide) =>
   s.kind === 'cover' ? 'Intro'
   : s.kind === 'problem' ? 'Problem'
+  : s.kind === 'divider' ? s.title
+  : s.kind === 'prorecap' ? 'Pro recap'
   : s.kind === 'pricing' ? 'Pricing'
   : s.kind === 'close' ? 'Shuru karein'
   : s.tag;
@@ -115,10 +164,7 @@ export const Pitch = () => {
 
   useEffect(() => { document.title = 'GymSetu — Demo'; }, []);
 
-  const go = useCallback((to: number, d: 1 | -1) => {
-    setDir(d);
-    setI((prev) => Math.max(0, Math.min(n - 1, to)));
-  }, [n]);
+  const go = useCallback((to: number, d: 1 | -1) => { setDir(d); setI(Math.max(0, Math.min(n - 1, to))); }, [n]);
   const next = useCallback(() => go(i + 1, 1), [i, go]);
   const prev = useCallback(() => go(i - 1, -1), [i, go]);
 
@@ -137,24 +183,21 @@ export const Pitch = () => {
 
   return (
     <div className="fixed inset-0 z-[100] bg-ink text-bone overflow-hidden select-none"
-         onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
-         onTouchEnd={(e) => {
-           if (touchX.current == null) return;
-           const dx = e.changedTouches[0].clientX - touchX.current;
-           if (Math.abs(dx) > 45) (dx < 0 ? next : prev)();
-           touchX.current = null;
-         }}>
-      {/* Ambient */}
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+      onTouchEnd={(e) => {
+        if (touchX.current == null) return;
+        const dx = e.changedTouches[0].clientX - touchX.current;
+        if (Math.abs(dx) > 45) (dx < 0 ? next : prev)();
+        touchX.current = null;
+      }}>
       <div className="hud-grid absolute inset-0 opacity-60" aria-hidden="true" />
       <div className="glow-orb animate-float-glow" aria-hidden="true"
         style={{ width: 620, height: 620, top: -180, right: -140, background: 'radial-gradient(circle,#FF4D0026,transparent 65%)' }} />
 
-      {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-white/8 z-30">
         <div className="h-full bg-heat transition-[width] duration-300" style={{ width: `${((i + 1) / n) * 100}%` }} />
       </div>
 
-      {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 md:px-7 pt-4 z-30">
         <img src="/gymsetu-logo.png" alt="GymSetu" className="h-7 md:h-8 w-auto" />
         <div className="flex items-center gap-3">
@@ -166,25 +209,24 @@ export const Pitch = () => {
         </div>
       </div>
 
-      {/* Tap zones (desktop + mobile) */}
       <button aria-label="Previous" onClick={prev}
         className="absolute left-0 top-0 bottom-0 w-[28%] z-10 cursor-w-resize disabled:cursor-default" disabled={i === 0} />
       <button aria-label="Next" onClick={next}
         className="absolute right-0 top-0 bottom-0 w-[38%] z-10 cursor-e-resize disabled:cursor-default" disabled={i === n - 1} />
 
-      {/* Slide */}
-      <div key={i} className="relative h-full w-full flex items-center justify-center px-6 md:px-10"
+      <div key={i} className="relative h-full w-full flex items-center justify-center px-6 md:px-10 overflow-y-auto py-20"
         style={{ animation: 'pitchIn .34s cubic-bezier(.22,.61,.36,1)' }}>
         <div className="w-full max-w-3xl mx-auto" style={{ ['--d' as any]: dir }}>
           {slide.kind === 'cover' && <Cover onStart={next} />}
           {slide.kind === 'problem' && <Problem />}
+          {slide.kind === 'divider' && <Divider s={slide} />}
           {slide.kind === 'feature' && <Feature s={slide} index={slide.num} total={slide.totalF} />}
+          {slide.kind === 'prorecap' && <ProRecap />}
           {slide.kind === 'pricing' && <Pricing />}
           {slide.kind === 'close' && <Close />}
         </div>
       </div>
 
-      {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 md:px-7 pb-5 z-30">
         <button onClick={prev} disabled={i === 0}
           className="flex items-center gap-1.5 text-ash enabled:hover:text-bone disabled:opacity-25 font-mono text-[11px] uppercase tracking-wider">
@@ -199,10 +241,8 @@ export const Pitch = () => {
         </button>
       </div>
 
-      {/* Jump grid */}
       {grid && (
-        <div className="absolute inset-0 z-40 bg-ink/95 backdrop-blur-md overflow-y-auto p-6 md:p-10"
-          onClick={() => setGrid(false)}>
+        <div className="absolute inset-0 z-40 bg-ink/95 backdrop-blur-md overflow-y-auto p-6 md:p-10" onClick={() => setGrid(false)}>
           <div className="max-w-4xl mx-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-display text-2xl text-bone uppercase tracking-tight">Saari slides</h3>
@@ -222,19 +262,14 @@ export const Pitch = () => {
       )}
 
       <style>{`
-        @keyframes pitchIn {
-          from { opacity: 0; transform: translateX(calc(var(--d, 1) * 34px)); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [style*="pitchIn"] { animation: none !important; }
-        }
+        @keyframes pitchIn { from { opacity:0; transform: translateX(calc(var(--d,1) * 34px)); } to { opacity:1; transform: translateX(0); } }
+        @media (prefers-reduced-motion: reduce) { [style*="pitchIn"] { animation: none !important; } }
       `}</style>
     </div>
   );
 };
 
-// ── Slide types ──────────────────────────────────────────────────────────────
+// ── Slides ───────────────────────────────────────────────────────────────────
 const Cover = ({ onStart }: { onStart: () => void }) => (
   <div className="text-center">
     <img src="/gymsetu-logo.png" alt="GymSetu" className="h-24 md:h-32 w-auto mx-auto mb-8" />
@@ -242,8 +277,7 @@ const Cover = ({ onStart }: { onStart: () => void }) => (
       Aapke gym ka <span className="text-heat">poora system</span><br />— ek app mein
     </h1>
     <p className="font-sans text-lg md:text-xl text-ash mt-6 max-w-xl mx-auto leading-relaxed">
-      Members, payments, attendance, reminders — sab kuch.
-      No register, no Excel, no tension.
+      Members, payments, attendance, reminders aur reports — sab kuch. No register, no Excel, no tension.
     </p>
     <button onClick={onStart}
       className="inline-flex items-center gap-2.5 mt-10 bg-heat text-black px-7 py-4 rounded-lg font-mono text-sm uppercase font-bold tracking-wider hover:gap-4 transition-all">
@@ -263,8 +297,8 @@ const Problem = () => (
       {[
         'Kaun sa member expire ho gaya — yaad hi nahi rehta.',
         'Kiska payment baaki hai — dhoondhte reh jaate ho.',
-        'Member gym aana band kar de — pata hi nahi chalta, aur woh chhod deta hai.',
-        'Mahine ke end mein kamai ka hisaab — ghanton lag jaate hain.',
+        'Member gym aana band kar de — pata hi nahi chalta, woh chhod deta hai.',
+        'Kamai badh rahi hai ya ghat — koi clear hisaab nahi.',
       ].map((t, k) => (
         <div key={k} className="flex gap-4 items-start glass rounded-xl px-5 py-4">
           <span className="flex-none w-7 h-7 rounded-full grid place-items-center text-flame bg-flame/10 border border-flame/30 font-bold text-sm">✕</span>
@@ -272,28 +306,48 @@ const Problem = () => (
         </div>
       ))}
     </div>
-    <p className="font-sans text-lg text-bone mt-8">
-      Yeh sab <b className="text-flame">GymSetu</b> solve karta hai. Dekhiye kaise 👇
-    </p>
+    <p className="font-sans text-lg text-bone mt-8">Yeh sab <b className="text-flame">GymSetu</b> solve karta hai. Dekhiye kaise 👇</p>
   </div>
 );
+
+const Divider = ({ s }: { s: Extract<Slide, { kind: 'divider' }> }) => {
+  const Icon = s.icon;
+  return (
+    <div className="text-center">
+      <span className="inline-grid place-items-center w-16 h-16 rounded-2xl bg-flame/12 border border-flame/25 mx-auto mb-6">
+        <Icon className="w-8 h-8 text-flame" />
+      </span>
+      <p className="font-mono text-[11px] uppercase tracking-[0.28em] font-bold text-ash mb-3">{s.sec}</p>
+      <h2 className="font-display text-4xl sm:text-5xl md:text-6xl text-bone uppercase leading-[0.92] tracking-tight text-balance">
+        {s.title}
+      </h2>
+      <p className="font-sans text-lg md:text-xl text-ash mt-4">{s.sub}</p>
+    </div>
+  );
+};
+
+const TierBadge = ({ tier }: { tier: Tier }) => {
+  const t = TIER_STYLE[tier];
+  return <span className={`font-mono text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${t.cls}`}>{t.label}</span>;
+};
 
 const Feature = ({ s, index, total }: { s: FeatureData; index: number; total: number }) => {
   const Icon = s.icon;
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-5">
         <span className="flex-none w-12 h-12 rounded-xl grid place-items-center bg-flame/12 border border-flame/25">
           <Icon className="w-6 h-6 text-flame" />
         </span>
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.22em] font-bold text-ash">
-            Feature {String(index).padStart(2, '0')} / {String(total).padStart(2, '0')} · {s.tag}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-ash">
+            {String(index).padStart(2, '0')}/{String(total).padStart(2, '0')} · {s.tag}
           </p>
+          <TierBadge tier={s.tier} />
         </div>
       </div>
 
-      <h2 className="font-display text-3xl sm:text-4xl md:text-[3.1rem] text-bone uppercase leading-[0.96] tracking-tight text-balance mb-7">
+      <h2 className="font-display text-3xl sm:text-4xl md:text-[2.9rem] text-bone uppercase leading-[0.98] tracking-tight text-balance mb-6">
         {s.title}
       </h2>
 
@@ -313,27 +367,65 @@ const Feature = ({ s, index, total }: { s: FeatureData; index: number; total: nu
   );
 };
 
-const Pricing = () => (
+const ProRecap = () => (
   <div>
-    <p className="font-mono text-[11px] uppercase tracking-[0.25em] font-bold text-flame mb-4">Pricing</p>
-    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-bone uppercase leading-[0.95] tracking-tight text-balance mb-8">
-      Har gym ke liye <span className="text-heat">ek plan</span>
+    <div className="flex items-center gap-2.5 mb-4">
+      <p className="font-mono text-[11px] uppercase tracking-[0.25em] font-bold text-flame">Sabse popular plan</p>
+      <TierBadge tier="pro" />
+    </div>
+    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-bone uppercase leading-[0.95] tracking-tight text-balance mb-3">
+      Pro mein <span className="text-heat">yeh sab</span> unlock hota hai
     </h2>
-    <div className="grid grid-cols-2 gap-3">
-      {PLANS.map((p) => (
-        <div key={p.name} className={`rounded-2xl p-5 border ${p.popular ? 'border-flame/50 bg-flame/[0.07]' : 'border-hairline glass'}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-display text-lg text-bone uppercase tracking-tight">{p.name}</span>
-            {p.popular && <span className="font-mono text-[9px] uppercase font-bold tracking-wider text-flame bg-flame/15 border border-flame/30 rounded-full px-2 py-0.5">Popular</span>}
-          </div>
-          <div className="font-display text-3xl text-bone mb-1">₹{p.price}<span className="font-sans text-[13px] text-ash font-normal">/month</span></div>
-          <p className="font-sans text-[13px] text-ash leading-snug">{p.note}</p>
+    <p className="font-sans text-[15px] text-ash mb-6">Basic ka sab kuch — plus woh smart features jo members rok-te aur kamai badhaate hain:</p>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      {[
+        ['WhatsApp automatic reminders', 'Renewals khud yaad dilata hai'],
+        ['AI Insights & daily reports', 'Business advice, roz ka summary'],
+        ['Revenue Forecast', 'Agle 3 mahine ki kamai pehle se'],
+        ['Churn Early Warning', 'Chhodne wale member ka alert'],
+        ['AI Diet & Workout plans', 'Seconds mein personal plan'],
+        ['7-din free trial', 'Card ki zarurat nahi'],
+      ].map(([t, d]) => (
+        <div key={t} className="flex gap-3 glass rounded-xl px-4 py-3.5">
+          <Check className="w-5 h-5 text-emerald-400 flex-none mt-0.5" strokeWidth={3} />
+          <div><div className="font-sans text-[15px] text-bone font-semibold leading-snug">{t}</div>
+            <div className="font-sans text-[12.5px] text-ash leading-snug">{d}</div></div>
         </div>
       ))}
     </div>
-    <p className="font-sans text-[15px] text-ash mt-6 text-center">
-      Saal ka lo toh aur sasta. <b className="text-bone">7 din free trial</b> — card ki zarurat nahi.
-    </p>
+    <div className="mt-6 flex items-baseline gap-2">
+      <span className="font-display text-4xl text-bone">₹1,699</span>
+      <span className="font-sans text-[14px] text-ash">/month · ≤200 members</span>
+    </div>
+  </div>
+);
+
+const Pricing = () => (
+  <div>
+    <p className="font-mono text-[11px] uppercase tracking-[0.25em] font-bold text-flame mb-4">Pricing</p>
+    <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-bone uppercase leading-[0.95] tracking-tight text-balance mb-7">
+      Har gym ke liye <span className="text-heat">ek plan</span>
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {PLANS.map((p) => (
+        <div key={p.name} className={`rounded-2xl p-5 border ${p.popular ? 'border-flame/50 bg-flame/[0.07]' : 'border-hairline glass'}`}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="font-display text-lg text-bone uppercase tracking-tight">{p.name}</span>
+            {p.popular && <span className="font-mono text-[9px] uppercase font-bold tracking-wider text-flame bg-flame/15 border border-flame/30 rounded-full px-2 py-0.5">Popular</span>}
+          </div>
+          <div className="font-display text-3xl text-bone">₹{p.price}<span className="font-sans text-[13px] text-ash font-normal">/mo</span></div>
+          <p className="font-sans text-[12px] text-ash mb-3 mt-0.5">{p.who}</p>
+          <ul className="flex flex-col gap-1.5">
+            {p.has.map((f) => (
+              <li key={f} className="flex gap-2 items-start font-sans text-[13px] text-bone/85 leading-snug">
+                <Check className="w-3.5 h-3.5 text-emerald-400 flex-none mt-0.5" strokeWidth={3} />{f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+    <p className="font-sans text-[15px] text-ash mt-5 text-center">Quarterly/yearly lein toh 8–15% tak sasta. <b className="text-bone">Pro pe 7-din free trial.</b></p>
   </div>
 );
 
