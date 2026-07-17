@@ -49,6 +49,7 @@ export const Footer = () => {
               <Link to="/pricing" className="hover:text-flame transition-colors">Pricing</Link>
               <Link to="/features" className="hover:text-flame transition-colors">Features</Link>
               <Link to="/contact" className="hover:text-flame transition-colors">Contact</Link>
+              <Link to="/how-to-install" className="hover:text-flame transition-colors">Install app</Link>
               <Link to="/privacy" className="hover:text-flame transition-colors">Privacy</Link>
               <Link to="/terms" className="hover:text-flame transition-colors">Terms</Link>
               <Link to="/refund" className="hover:text-flame transition-colors">Refunds</Link>

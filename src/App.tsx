@@ -14,6 +14,7 @@ import { Contact } from './pages/Contact';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
 import { Refund } from './pages/Refund';
+import { HowToInstall } from './pages/HowToInstall';
 import { Signup } from './pages/Signup';
 import { SignupPlan } from './pages/SignupPlan';
 import { SignupSetup } from './pages/SignupSetup';
@@ -111,6 +112,7 @@ function AppShell() {
           <Route path="/privacy"   element={<Privacy />} />
           <Route path="/terms"     element={<Terms />} />
           <Route path="/refund"    element={<Refund />} />
+          <Route path="/how-to-install" element={<HowToInstall />} />
           <Route path="/signup"        element={<Signup />} />
           <Route path="/signup/plan"   element={<SignupPlan />} />
           <Route path="/signup/setup"  element={<SignupSetup />} />
