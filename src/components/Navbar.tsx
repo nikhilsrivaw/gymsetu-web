@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
-import { Home, Zap, Tag, MessageCircle, LayoutDashboard, UserCircle, ShieldCheck } from 'lucide-react';
+import { Home, Zap, Tag, MessageCircle, LayoutDashboard, UserCircle, ShieldCheck, Presentation } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useIsAdmin } from '../lib/admin';
 
 const navLinks = [
   { name: 'HOME', path: '/', icon: Home },
   { name: 'FEATURES', path: '/features', icon: Zap },
+  { name: 'DEMO', path: '/pitch', icon: Presentation },
   { name: 'PRICING', path: '/pricing', icon: Tag },
   { name: 'CONTACT', path: '/contact', icon: MessageCircle },
 ];
