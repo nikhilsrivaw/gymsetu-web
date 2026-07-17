@@ -6,6 +6,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
 import { PRICING, type PlanId } from '../lib/constants';
+import { AdminLeads } from './AdminLeads';
 
 // ── Types ──────────────────────────────────────────────────────
 type SubStatus = 'trial' | 'active' | 'expired' | 'cancelled';
@@ -75,7 +76,7 @@ const EYEBROW = 'font-mono text-[10px] uppercase tracking-[0.2em] text-ash';
 // ── Component ──────────────────────────────────────────────────
 export const Admin = () => {
   const { toast } = useToast();
-  const [tab, setTab] = useState<'overview' | 'gyms' | 'payments'>('overview');
+  const [tab, setTab] = useState<'overview' | 'gyms' | 'payments' | 'leads'>('overview');
   const [rows, setRows] = useState<GymRow[]>([]);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -232,7 +233,7 @@ export const Admin = () => {
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 glass rounded-lg w-fit mb-8">
-          {([['overview', 'Overview'], ['gyms', 'Gyms & Owners'], ['payments', 'Payments']] as const).map(([id, label]) => (
+          {([['overview', 'Overview'], ['gyms', 'Gyms & Owners'], ['payments', 'Payments'], ['leads', 'Field Leads']] as const).map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)}
               className={`px-4 py-2 rounded-md font-mono text-[11px] uppercase font-bold tracking-wider transition-colors ${
                 tab === id ? 'bg-heat text-black' : 'text-ash hover:text-bone'}`}>
@@ -265,6 +266,7 @@ export const Admin = () => {
                 rows={filteredPurchases} total={purchases.length}
                 filter={payFilter} setFilter={setPayFilter} onStatus={setPurchaseStatus} />
             )}
+            {tab === 'leads' && <AdminLeads />}
           </>
         )}
       </div>
