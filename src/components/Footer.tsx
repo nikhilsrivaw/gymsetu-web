@@ -29,10 +29,15 @@ export const Footer = () => {
           {/* bottom bar */}
           <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-6 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
             <span>© {new Date().getFullYear()} GymSetu · Built for Indian gyms</span>
-            <nav aria-label="Footer navigation" className="flex gap-8">
+            {/* Payment gateways check that terms/privacy/refund are reachable
+                from the site, and a footer is where reviewers look first. */}
+            <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-8 gap-y-3">
               <Link to="/pricing" className="hover:text-flame transition-colors">Pricing</Link>
               <Link to="/features" className="hover:text-flame transition-colors">Features</Link>
               <Link to="/contact" className="hover:text-flame transition-colors">Contact</Link>
+              <Link to="/privacy" className="hover:text-flame transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-flame transition-colors">Terms</Link>
+              <Link to="/refund" className="hover:text-flame transition-colors">Refunds</Link>
             </nav>
           </div>
         </div>

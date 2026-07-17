@@ -4,6 +4,19 @@ export const APP_STORE_URL = 'https://apps.apple.com/app/gymsetu/id000000000';
 
 export const SUPPORT_EMAIL = 'support@gymsetu.com';
 
+// ── Legal identity, used by /privacy, /terms and /refund ────────────────────
+// ⚠️ MUST BE FILLED IN BEFORE THOSE PAGES ARE PUBLISHED. They are placeholders,
+// not defaults — they render verbatim on public pages, and PayU/Razorpay
+// onboarding checks that a real entity and address are stated. Claude did not
+// invent these because a wrong legal entity on a published policy is worse than
+// an obviously missing one.
+export const LEGAL_ENTITY = '[TODO: registered entity name, e.g. "Acme Fitness Technologies Pvt Ltd"]';
+export const LEGAL_ADDRESS = '[TODO: registered address, incl. city, state and PIN]';
+export const LEGAL_JURISDICTION = '[TODO: city for jurisdiction, e.g. "Lucknow, Uttar Pradesh"]';
+
+// Bump when the policies change materially; it's the date shown to users.
+export const LEGAL_UPDATED = '17 July 2026';
+
 // Plan type
 export type PlanId = 'basic' | 'pro' | 'pro_plus' | 'pro_max';
 

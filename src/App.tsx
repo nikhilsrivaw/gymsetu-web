@@ -11,6 +11,9 @@ import { Home } from './pages/Home';
 import { Pricing } from './pages/Pricing';
 import { Features } from './pages/Features';
 import { Contact } from './pages/Contact';
+import { Privacy } from './pages/Privacy';
+import { Terms } from './pages/Terms';
+import { Refund } from './pages/Refund';
 import { Signup } from './pages/Signup';
 import { SignupPlan } from './pages/SignupPlan';
 import { SignupSetup } from './pages/SignupSetup';
@@ -96,6 +99,11 @@ function AppShell() {
           <Route path="/pricing"   element={<Pricing />} />
           <Route path="/features"  element={<Features />} />
           <Route path="/contact"   element={<Contact />} />
+          {/* Required by PayU/Razorpay onboarding and by Google Play (needs a
+              privacy policy URL). Keep these publicly reachable — no auth. */}
+          <Route path="/privacy"   element={<Privacy />} />
+          <Route path="/terms"     element={<Terms />} />
+          <Route path="/refund"    element={<Refund />} />
           <Route path="/signup"        element={<Signup />} />
           <Route path="/signup/plan"   element={<SignupPlan />} />
           <Route path="/signup/setup"  element={<SignupSetup />} />
